@@ -11,7 +11,6 @@ import { BellIcon,
   
 import { useState } from 'react';
 
-
 const WalletScreen = () => {
 
   const [activeTab, setActiveTab] = useState('tokens');
@@ -24,7 +23,7 @@ const WalletScreen = () => {
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
           <img
-            src="https://via.placeholder.com/40"
+            src="ziptos.svg"
             alt="Profile"
             className="rounded-full h-10 w-10 mr-2"
           />
