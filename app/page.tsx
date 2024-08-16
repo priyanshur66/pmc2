@@ -22,9 +22,9 @@ export default function Home() {
     }  })
 
   return (
-    <main className="p-4">
-      {userData ? (
-        <>
+    <main className="bg-gradient-to-b from-gray-800 to-black">
+      {/* {userData ? ( */}
+        {/* <> */}
           {/* <h1 className="text-2xl font-bold mb-4">User Data</h1>
           <ul>
             <li>ID: {userData.id}</li>
@@ -35,10 +35,10 @@ export default function Home() {
             <li>Is Premium: {userData.is_premium ? 'Yes' : 'No'}</li>
           </ul> */}
           <WalletScreen/>
-        </>
-      ) : (
-        <div>Loading...</div>
-      )}
+        {/* </> */}
+      {/* ) : ( */}
+        {/* <div>Loading...</div> */}
+      {/* )} */}
     </main>
   );
 }
