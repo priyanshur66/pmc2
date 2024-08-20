@@ -6,7 +6,7 @@ const Navbar = () => {
   const [activeTab, setActiveTab] = useState('home');
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white flex justify-around items-center py-2 shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-[#323030] text-white flex justify-around items-center py-2 shadow-lg">
         <Link href="/">
         
       <button

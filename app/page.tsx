@@ -22,7 +22,9 @@ export default function Home() {
     }  })
 
   return (
-    <main className="bg-gradient-to-b from-gray-800 to-black">
+    <main className="bg-gradient-to-b from-[#323030] to-black text-white h-screen items-center w-full">
+{/* <div className="fixed top-0 left-0 w-full transform translate-x-4 bg-blue shadow-lg z-50"/> */}
+
       {/* {userData ? ( */}
         {/* <> */}
           {/* <h1 className="text-2xl font-bold mb-4">User Data</h1>

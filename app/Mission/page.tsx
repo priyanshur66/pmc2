@@ -88,7 +88,7 @@ const ZiptosPocket = () => {
         title="Backup your seed phrase"
         description="Complete this mission to unlock Special mission 2"
         reward="0.1 ZPTS"
-        gradientColors="from-red-500 to-orange-500"
+        gradientColors="from-[#F33439] to-[#FFCA28]"
         imageSrc="mission.svg"
       />
       
@@ -96,7 +96,7 @@ const ZiptosPocket = () => {
         title="Subscribe to Youtube"
         description="Subscribe to the Ziptos channel on youtube."
         reward="0.1 ZPTS"
-        gradientColors="from-orange-500 to-yellow-500"
+        gradientColors="from-[#F33439] to-[#FFCA28]"
         imageSrc="mission.svg"
       />
     </div>

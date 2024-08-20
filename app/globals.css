@@ -3,3 +3,7 @@
 @tailwind utilities;
 
 
+.pink__gradient {
+    background: linear-gradient(90deg, #f4c4f3 0%, #F33439 100%);
+    filter: blur(900px);
+  }
