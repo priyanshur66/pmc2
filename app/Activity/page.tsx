@@ -15,7 +15,7 @@ function TransactionPage() {
       <div>
         <p className="text-white font-semibold text-lg">Your transactions</p>
         <p className="text-white font-semibold ">will appear here</p>
-        <p className="text-gray-500 mt-4">You don't have any transactions yet</p>
+        <p className="text-gray-500 mt-4">You don&apos;t have any transactions yet</p>
       </div>
     </div>
   );
