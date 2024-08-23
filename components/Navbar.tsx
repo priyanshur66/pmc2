@@ -23,8 +23,8 @@ const Navbar = () => {
         onClick={() => setActiveTab('dapps')}
       >
         <div className="relative">
-          <GlobeAltIcon className="h-14 w-14 p-2 rounded-full bg-red-600 text-white" />
-          <span className="absolute inset-0 rounded-full border-2 border-red-500" />
+          <GlobeAltIcon className="h-14 w-14 p-2 rounded-full bg-gradient-to-b from-[#F33439] to-[#F33439]/60 text-white" />
+          <span className="absolute inset-0 rounded-full border-2 border-[#F33439]" />
         </div>
         <span className="text-xs mt-1">DApps</span>
       </button>

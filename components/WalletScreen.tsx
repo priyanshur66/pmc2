@@ -19,11 +19,13 @@ const WalletScreen = () => {
     // <div className='bg-black text-white h-screen flex flex-col items-center px-4 py-2 space-y-4'>
 
     <div>
-      <div className="px-4 py-6 space-y-4 ">
-        {/* <div className="fixed z-[0] left-0 w-full top-[10] shadow-lg transform translate-x-4 shadow-red-600" /> */}
+      <div className="">
+        {/* <div className="fixed z-[0] left-0 w-full top-[10] shadow-lg transform translate-x-4 shadow-[#F33439] opacity-35" /> */}
 
-        <div className="flex justify-between items-center mb-4 z-[1]">
-          <div className="flex items-center">
+        <div className=" bg-gradient-to-b from-[#F33439]/25 to-[#0F0F0F]  inset-0 ">
+          <div className="flex justify-between items-center mb-4 z-[1] px-4 py-6 space-y-4">
+
+          <div className="flex items-center ">
             <img
               src="ziptos.svg"
               alt="Profile"
@@ -56,59 +58,71 @@ const WalletScreen = () => {
               <Bars3Icon className="h-6 w-6" />
             </Link>
           </div>
+          </div>
+
         </div>
-        <div className="bg-[#323030] p-4 rounded-lg flex justify-between items-center">
+        <div className="px-4 py-6 space-x-4">
+
+        <div className="bg-[#323030]/40 p-6 mx-4 rounded-xl flex justify-between items-center">
           <div>
-            <span className="text-xs text-green-400">Main Balance</span>
-            <h2 className="text-2xl font-semibold">$2,172.38</h2>
+            <span className="text-xl text-green-400">Main Balance</span>
+            <h2 className="text-4xl mt-1 font-semibold">$2,172.38</h2>
           </div>
           <EyeIcon className="h-6 w-6 text-gray-400" />
         </div>
+        </div>
+
 
         {/* <div className="p-4 bg-gradient-to-b from-gray-800 to-black text-white"> */}
         {/* Top Icons Section */}
         {/* Action Buttons */}
-        <div className="flex justify-between w-full space-x-4">
+        <div className="flex justify-between w-full space-x-4 px-4 py-6">
           <button className="flex flex-col items-center space-y-1 text-center">
-            <div className="w-12 h-12 bg-[#323030] rounded-full flex items-center justify-center">
+            <div className="w-20 h-20 bg-[#323030]/40 rounded-full flex items-center justify-center">
               <img src="/send.svg" alt="" />
             </div>{" "}
             {/* Arrow icon */}
-            <p className="text-xs">Send</p>
+            <p className="text-s">Send</p>
           </button>
           <button className="flex flex-col items-center space-y-1 text-center">
-            <div className="w-12 h-12 bg-[#323030] rounded-full flex items-center justify-center">
+            <div className="w-20 h-20 bg-[#323030]/40 rounded-full flex items-center justify-center">
               <img src="/send.svg" alt="" className="transform rotate-180" />
             </div>{" "}
             {/* Request icon */}
-            <p className="text-xs">Request</p>
+            <p className="text-s mt-1">Request</p>
           </button>
           <button className="flex flex-col items-center space-y-1 text-center">
             <Link href="/Buy">
-              <div className="w-12 h-12 bg-[#323030] rounded-full flex items-center justify-center">
+              <div className="w-20 h-20 bg-[#323030]/40 rounded-full flex items-center justify-center">
                 <img src="/Vector.svg" alt="" />
               </div>{" "}
               {/* Dollar icon */}
-              <p className="text-xs">Buy</p>
+              <p className="text-s mt-1">Buy</p>
             </Link>
           </button>
           <button className="flex flex-col items-center space-y-1 text-center">
             <Link href="/Activity">
-              <div className="w-12 h-12 bg-[#323030] rounded-full flex items-center justify-center">
+              <div className="w-20 h-20 bg-[#323030]/40 rounded-full flex items-center justify-center">
                 <img src="/Group.svg" alt="" />
               </div>{" "}
               {/* Activity icon */}
-              <p className="text-xs">Activity</p>
+              <p className="text-s mt-1">Activity</p>
             </Link>
           </button>
         </div>
-        <div className="p-4">
+
+        <div className="px-4 space-y-4">
+        <div className="p-4 ">
           <div className="bg-[url('../public/Rectangle.svg')] w-full h-24 rounded-lg relative">
-            <p className="absolute bottom-2 right-2 bg-white text-black px-2 py-1 rounded-full">
+            <p className="absolute bottom-2 right-2 bg-[#FFFFFF]/80 text-black px-4 py-1 rounded-lg font-semibold">
               Exclusive
             </p>
           </div>
         </div>
+        </div>
+
+
+        <div className="px-4 space-y-4">
 
         <div className="flex justify-between items-center w-full p-4">
           <div className="flex space-x-2">
@@ -137,16 +151,28 @@ const WalletScreen = () => {
             <EllipsisVerticalIcon className="h-5 w-5 text-gray-400" />
           </Link>
         </div>
+        </div>
+        
+        <div className="px-4 py-4 space-y-4">
 
-        <div className="bg-[#323030] rounded-lg w-full p-4 flex items-center justify-between">
+        <div className="bg-[#484848]/50 rounded-lg w-full p-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-[url('../public/aptos.svg')] rounded-full"></div>{" "}
             {/* Placeholder for token icon */}
-            <p className="font-semibold">Aptos</p>
+            <div className="grid-rows-2">
+            <p className="font-semibold px-4 text-xl">Aptos</p>
+            <p className="font-light px-4 text-s mt-1" >521.90Apt</p>
+
+            </div>
           </div>
+          <div className="grid-rows-2">
           <p className="text-xl font-bold">$2,142.28</p>
           <p className="text-sm text-green-400">+0.91%</p>
+          </div>
+
         </div>
+        </div>
+
 
         <Navbar />
       </div>
