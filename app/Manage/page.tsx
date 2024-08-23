@@ -1,4 +1,6 @@
-import React from 'react';
+"use client"
+
+import { useRouter } from "next/navigation";
 
 function SelectTokenPage() {
   const tokens = [
@@ -12,11 +14,14 @@ function SelectTokenPage() {
     { icon: '/akt.svg', name: 'AKT', description: 'Akash Network', enabled: false },
   ];
 
+  const router = useRouter();
+
   return (
     <div className="h-screen bg-[#323030] text-white px-4">
       {/* Back button */}
       <div className="absolute top-4 left-4">
-        <button className="text-white">
+        <button className="text-white"
+        onClick={() => router.back()} >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
           </svg>
