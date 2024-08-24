@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { useEffect, useState } from "react";
 import WebApp from "@twa-dev/sdk";
 import WalletScreen from "@/components/WalletScreen";
@@ -12,22 +12,22 @@ interface UserData {
   is_premium?: boolean;
 }
 
-
 export default function Home() {
-  const [userData, setUserData] = useState<UserData | null>(null)
+  const [userData, setUserData] = useState<UserData | null>(null);
 
-  useEffect(() =>{
+  useEffect(() => {
     if (WebApp.initDataUnsafe.user) {
-      setUserData(WebApp.initDataUnsafe.user as UserData)
-    }  })
+      setUserData(WebApp.initDataUnsafe.user as UserData);
+    }
+  });
 
   return (
-    <main className="bg-[#0F0F0F] text-white h-screen items-center w-full ">
-{/* <div className="fixed top-0 left-0 w-full transform translate-x-4 bg-blue shadow-lg z-50"/> */}
+    <main className="bg-[#0F0F0F] text-white min-h-screen items-center w-full ">
+      {/* <div className="fixed top-0 left-0 w-full transform translate-x-4 bg-blue shadow-lg z-50"/> */}
 
       {/* {userData ? ( */}
-        {/* <> */}
-          {/* <h1 className="text-2xl font-bold mb-4">User Data</h1>
+      {/* <> */}
+      {/* <h1 className="text-2xl font-bold mb-4">User Data</h1>
           <ul>
             <li>ID: {userData.id}</li>
             <li>First Name: {userData.first_name}</li>
@@ -36,10 +36,10 @@ export default function Home() {
             <li>Language Code: {userData.language_code}</li>
             <li>Is Premium: {userData.is_premium ? 'Yes' : 'No'}</li>
           </ul> */}
-          <WalletScreen/>
-        {/* </> */}
+      <WalletScreen />
+      {/* </> */}
       {/* ) : ( */}
-        {/* <div>Loading...</div> */}
+      {/* <div>Loading...</div> */}
       {/* )} */}
     </main>
   );
