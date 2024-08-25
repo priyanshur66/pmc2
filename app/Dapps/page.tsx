@@ -20,16 +20,18 @@ const TokenCard: React.FC<TokenCardProps> = ({
   changePositive,
 }) => {
   return (
-    <div className="bg-gray-800 rounded-lg p-4 flex justify-between items-center mb-4 shadow-lg">
+    <div className="bg-[#4848487A] rounded-lg p-4 flex justify-between items-center mb-4 shadow-lg">
+      {/* <div className="bg-gradient-to-b from-[#F33439]/25  to-[#0F0F0F]  inset-0"> */}
+
       <div className="flex items-center">
         <img
           src={iconSrc}
           alt={`${name} icon`}
-          className="w-10 h-10 rounded-full mr-4"
+          className="w-12 h-12 rounded-full mr-4"
         />
         <div>
-          <h2 className="text-lg font-semibold">{name}</h2>
-          <p className="text-sm text-gray-400">
+          <h2 className="text-lg font-bold">{name}</h2>
+          <p className="text-sm text-white">
             {price}{" "}
             <span
               className={changePositive ? "text-green-500" : "text-red-500"}
@@ -39,24 +41,40 @@ const TokenCard: React.FC<TokenCardProps> = ({
           </p>
         </div>
       </div>
-      <span className="text-gray-400 font-bold">{symbol}</span>
+      {/* </div> */}
+
+
+      <span className="text-white font-bold">{symbol}</span>
     </div>
   );
 };
 const page = () => {
   return (
-    <div className=" bg-gradient-to-b from-gray-800 to-black text-white h-screen items-center w-full px-4 py-6 space-y-4">
-      <div className=" min-h-screen text-white p-4">
+    <div className="bg-[#0F0F0F] min-h-screen text-white">
+    <div className="items-center w-full">
+    {/* <div className=" bg-[#0F0F0F] text-white h-screen items-center w-full px-4 py-6 space-y-4">
+    <div className=" min-h-screen text-white p-4"> */}
         {/* Search Bar */}
-        <div className="mb-4">
-          <input
+        <div className=" bg-gradient-to-b from-[#F33439]/25  to-[#0F0F0F]  inset-0">
+        {/* <div className="mb-4"> */}
+        <div className="flex justify-between items-center mb-4 z-[1] px-4 py-6 space-y-4">
+        <div className="relative w-full">
+          <img src="/search.svg" alt=""
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+ />
+        <input
             type="text"
             placeholder="Search or enter dApp URL"
-            className="w-full p-2 rounded-lg bg-gray-800 text-gray-400 placeholder-gray-500 focus:outline-none"
-          />
+            className="w-full p-2 pl-10 rounded-lg bg-[#323030] text-white placeholder-white focus:outline-none"
+            />
         </div>
+          
+        </div>
+        </div>
+       
 
         {/* Tab Navigation */}
+        <div className="px-4 space-y-4">
         <div className="flex space-x-4 mb-4">
           <button className="text-white border-b-2 border-red-500 pb-1">
             Swap
@@ -66,26 +84,33 @@ const page = () => {
           <button className="text-gray-400">Socials</button>
           <button className="text-gray-400">Marketplace</button>
         </div>
+        </div>
+
 
         {/* DApp Card */}
-        <div className="bg-gray-800 rounded-lg p-4 flex justify-between items-center">
-          <div className="flex items-center">
+        <div className="px-4 py-2 space-y-4">
+        <div className="bg-[#4848487A] rounded-xl p-4 flex justify-between items-center ">
+          <div className="flex items-center ">
             <img
               src="ziptos.svg"
               alt="DApp Icon"
-              className="w-10 h-10 rounded-full mr-4"
+              className="w-12 h-12 rounded-full mr-4"
             />
             <div>
-              <h2 className="text-lg font-semibold">Ziployer</h2>
-              <p className="text-sm text-gray-400">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              </p>
+              <h2 className="text-lg font-bold">Ziployer</h2>
+              <p className="text-sm text-gray-200 font-extralight">
+              Lorem ipsum dolor sit amet, consec..              </p>
             </div>
+
           </div>
+          <img src="/arrow.svg" alt=""/>
+
           <button className="text-red-500">
             <i className="fas fa-chevron-right"></i>
           </button>
         </div>
+        </div>
+
 
         {/* Pagination Dots */}
         <div className="flex justify-center mt-4">

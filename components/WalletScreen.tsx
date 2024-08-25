@@ -52,19 +52,20 @@ const WalletScreen = () => {
           </div>
         </div>
         <div className="px-4 py-6 space-x-4">
-          <div className="bg-[#323030]/40 p-6 mx-4 rounded-xl flex justify-between items-center">
-            <div>
-              <span className="text-xl text-green-400">Main Balance</span>
-              <h2 className="text-4xl mt-1 font-semibold">$2,172.38</h2>
-            </div>
-            <img src="/eye.svg" alt="" className="h-6 w-6" />
+
+        <div className="bg-[#323030]/40 p-6 mx-4 rounded-xl flex justify-between items-center">
+          <div>
+            <span className="text-xl text-green-400">Main Balance</span>
+            <h2 className="text-4xl mt-1 font-semibold">$2,172.38</h2>
           </div>
+          <img src="/eye.svg" alt="" className="h-6 w-6" />
+        </div>
         </div>
 
         {/* <div className="p-4 bg-gradient-to-b from-gray-800 to-black text-white"> */}
         {/* Top Icons Section */}
         {/* Action Buttons */}
-        <div className="flex justify-between w-full space-x-4 px-4 py-6">
+        <div className="flex justify-between w-full space-x-4 px-4 py-4">
           <button className="flex flex-col items-center space-y-1 text-center">
             <div className="w-20 h-20 bg-[#323030]/40 border border-[#424242] shadow-lg shadow-[#F4A100]/15 rounded-full flex items-center justify-center">
               <img src="/send.svg" alt="" />

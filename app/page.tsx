@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import WebApp from "@twa-dev/sdk";
 import WalletScreen from "@/components/WalletScreen";
+import Navbar from "@/components/Navbar";
 
 interface UserData {
   id: number;
@@ -23,7 +24,7 @@ export default function Home() {
 
   return (
     <main className="bg-[#0F0F0F] text-white min-h-screen items-center w-full ">
-      {/* <div className="fixed top-0 left-0 w-full transform translate-x-4 bg-blue shadow-lg z-50"/> */}
+{/* <div className="fixed top-0 left-0 w-full transform translate-x-4 bg-blue shadow-lg z-50"/> */}
 
       {/* {userData ? ( */}
       {/* <> */}
@@ -36,8 +37,9 @@ export default function Home() {
             <li>Language Code: {userData.language_code}</li>
             <li>Is Premium: {userData.is_premium ? 'Yes' : 'No'}</li>
           </ul> */}
-      <WalletScreen />
-      {/* </> */}
+          <WalletScreen/>
+          {/* <Navbar/> */}
+        {/* </> */}
       {/* ) : ( */}
       {/* <div>Loading...</div> */}
       {/* )} */}
