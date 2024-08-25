@@ -13,13 +13,8 @@ const Navbar = () => {
           className={`flex flex-col items-center ${selected === 'home' ? 'text-white' : 'text-gray-400'} pb-1`}
           onClick={() => setSelected('home')}
         >
-          {/* <button
-            className={`flex flex-col items-center ${
-              selected === "home" ? "bg-red-500" : "bg-gray-400"
-            } pb-1`}
-            onClick={() => setSelected("home")}
-          > */}
-            
+        <div className="w-10 h-1 bg-red-500 mt-1 rounded-full"></div>
+
             <img src="/Home.svg" alt="" className="h-10 w-10 mb-1" />
 
           {/* </button> */}
