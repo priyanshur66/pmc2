@@ -84,7 +84,7 @@ function SettingsPage() {
           
           <div
             key={index}
-            className={`flex items-center px-4 py-3 rounded-lg `} 
+            className={`flex items-center px-4 py-3 rounded-lg cursor-pointer`} 
             onClick={() => router.push(item.route)}
           
           >
