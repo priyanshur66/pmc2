@@ -92,7 +92,7 @@ const page = () => {
         <div className="bg-[#4848487A] rounded-xl p-4 flex justify-between items-center ">
           <div className="flex items-center ">
             <img
-              src="ziptos.svg"
+              src="/ziptos.svg"
               alt="DApp Icon"
               className="w-12 h-12 rounded-full mr-4"
             />
@@ -126,7 +126,7 @@ const page = () => {
           symbol="BTC"
           price="$61,052.45"
           change="+0.60%"
-          iconSrc="btc.svg"
+          iconSrc="/btc.svg"
           changePositive={true}
         />
 
@@ -135,7 +135,7 @@ const page = () => {
           symbol="ETH"
           price="$2,614.57"
           change="+0.58%"
-          iconSrc="eth.svg"
+          iconSrc="/eth.svg"
           changePositive={true}
         />
 
@@ -144,7 +144,7 @@ const page = () => {
           symbol="APT"
           price="$6.27"
           change="+9.74%"
-          iconSrc="aptos.svg"
+          iconSrc="/aptos.svg"
           changePositive={true}
         />
       </div>

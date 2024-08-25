@@ -16,21 +16,21 @@ const menus = [
     href: "/Dapps/Game-Fi",
   },
   {
-    title: "Socials",
+    title: "Token deployer",
     href: "/Dapps/Socials",
   },
-  {
-    title: "Marketplace",
-    href: "/Dapps/Marketplace",
-  },
+  // {
+  //   title: "Marketplace",
+  //   href: "/Dapps/Marketplace",
+  // },
 ];
 
 const NavforDapps = () => {
   const pathName = usePathname();
 
   return (
-    <div className="px-4 space-y-4">
-      <div className="flex space-x-4 mb-4">
+    <div className="px-6 space-y-4">
+      <div className="flex space-x-10 mb-4">
         {menus.map((menu) => (
           <Link
             key={menu.title}

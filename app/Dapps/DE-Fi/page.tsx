@@ -92,12 +92,32 @@ const page = () => {
         <div className="bg-[#4848487A] rounded-xl p-4 flex justify-between items-center ">
           <div className="flex items-center ">
             <img
-              src="ziptos.svg"
+              src="/zapper.svg"
               alt="DApp Icon"
               className="w-12 h-12 rounded-full mr-4"
             />
             <div>
-              <h2 className="text-lg font-bold">Ziployer</h2>
+              <h2 className="text-lg font-bold">Zapper</h2>
+              <p className="text-sm text-gray-200 font-extralight">
+                Lorem ipsum dolor sit amet, consec..{" "}
+              </p>
+            </div>
+          </div>
+          <img src="/arrow.svg" alt="" />
+
+          <button className="text-red-500">
+            <i className="fas fa-chevron-right"></i>
+          </button>
+        </div>
+        <div className="bg-[#4848487A] rounded-xl p-4 flex justify-between items-center ">
+          <div className="flex items-center ">
+            <img
+              src="/Ziploc.svg"
+              alt="DApp Icon"
+              className="w-12 h-12 rounded-full mr-4"
+            />
+            <div>
+              <h2 className="text-lg font-bold">Ziploc</h2>
               <p className="text-sm text-gray-200 font-extralight">
                 Lorem ipsum dolor sit amet, consec..{" "}
               </p>
@@ -126,7 +146,7 @@ const page = () => {
           symbol="BTC"
           price="$61,052.45"
           change="+0.60%"
-          iconSrc="btc.svg"
+          iconSrc="/btc.svg"
           changePositive={true}
         />
 
@@ -135,7 +155,7 @@ const page = () => {
           symbol="ETH"
           price="$2,614.57"
           change="+0.58%"
-          iconSrc="eth.svg"
+          iconSrc="/eth.svg"
           changePositive={true}
         />
 
@@ -144,7 +164,7 @@ const page = () => {
           symbol="APT"
           price="$6.27"
           change="+9.74%"
-          iconSrc="aptos.svg"
+          iconSrc="/aptos.svg"
           changePositive={true}
         />
       </div>

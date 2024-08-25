@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "react-feather";
 
 function ComingSoonPage() {
   const router = useRouter();
@@ -11,20 +12,8 @@ function ComingSoonPage() {
       <div className="absolute top-4 left-4" >
       <button onClick={() => router.back()} className="text-white">
           {/* Back Arrow Icon */}
-          <svg
-            className="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
+          <ArrowLeft className="mr-4" />
+
         </button>
       </div>
 
@@ -35,13 +24,25 @@ function ComingSoonPage() {
       </div>
 
       <div className="absolute top-20 inset-x-0 flex justify-center">
-        <div className="w-3/4">
+        {/* <div className="w-3/4">
           <input
             type="text"
             placeholder="Search ..."
             className="w-full px-4 py-2 rounded-full bg-[#0F0F0F] text-white placeholder-gray-500"
           />
-        </div>
+        </div> */}
+                    <div className="relative w-[90%]">
+              <img
+                src="/search.svg"
+                alt=""
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+              />
+              <input
+                type="text"
+                placeholder="Search ..."
+                className="w-full p-2 pl-10 rounded-2xl bg-[#212020] text-white placeholder-white focus:outline-none border border-[#5E5E5E]"
+              />
+            </div>
       </div>
 
       <div className="mt-32">

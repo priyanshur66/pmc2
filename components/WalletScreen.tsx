@@ -73,12 +73,16 @@ const WalletScreen = () => {
             {/* Arrow icon */}
             <p className="text-s">Send</p>
           </button>
+
           <button className="flex flex-col items-center space-y-1 text-center">
+            <Link href="/Receive">
             <div className="w-20 h-20 bg-[#323030]/40  border border-[#424242] shadow-lg shadow-[#F4A100]/15 rounded-full flex items-center justify-center">
               <img src="/send.svg" alt="" className="transform rotate-180" />
             </div>{" "}
             {/* Request icon */}
             <p className="text-s mt-1">Request</p>
+            </Link>
+           
           </button>
           <button className="flex flex-col items-center space-y-1 text-center">
             <Link href="/Buy">
