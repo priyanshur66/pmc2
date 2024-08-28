@@ -15,9 +15,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-[#0F0F0F] min-h-screen text-white">
       <div className="items-center w-full">
-        {/* <div className=" bg-[#0F0F0F] text-white h-screen items-center w-full px-4 py-6 space-y-4">
-    <div className=" min-h-screen text-white p-4"> */}
-        {/* Search Bar */}
+
         <div className=" bg-gradient-to-b from-[#F33439]/25  to-[#0F0F0F]  inset-0">
           {/* <div className="mb-4"> */}
           <div className="flex justify-between items-center mb-4 z-[1] px-4 py-6 space-y-4">
