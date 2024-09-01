@@ -10,7 +10,20 @@ import Link from "next/link";
 import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
-
+import {
+  Account,
+  AccountAddress,
+  AnyNumber,
+  Aptos,
+  AptosConfig,
+  InputViewFunctionData,
+  Network,
+  NetworkToNetworkName,
+  CreateEd25519AccountFromPrivateKeyArgs,
+  Ed25519PrivateKey,
+  Ed25519Account,
+  U8,
+} from "@aptos-labs/ts-sdk";
 
 
 interface UserData {
@@ -81,7 +94,10 @@ const WalletScreen = () => {
   const [activeTab, setActiveTab] = useState<TabType>('Tokens');
   const [userData, setUserData] = useState<UserData | null>(null)
   const [data, setData] = useState<MyData[]>([]);
-
+  const crypto = require('crypto');
+  const algorithm = 'aes-256-cbc';
+  const key = crypto.createHash('sha256').update('KEY').digest(); // Create a 32-byte key from the string
+  const iv = crypto.randomBytes(16);
   // useEffect(() => {
   //   const fetchData = async () => {
   //     try {
@@ -102,10 +118,14 @@ const WalletScreen = () => {
 
 
   useEffect(() =>{
+    if (typeof window !== 'undefined') {
+
     if (WebApp.initDataUnsafe.user) {
       setUserData(WebApp.initDataUnsafe.user as UserData)
-    }  })
-
+    } 
+ } })
+  
+  
     console.log(userData?.id)
 
     useEffect(() => {
