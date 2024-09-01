@@ -24,7 +24,7 @@ function SettingsPage() {
     {
       icon: "/lang.svg",
       text: "Language",
-      route:"/Account",
+      route:"/Settings/Language",
     },
     {
       icon: "/seed.svg",
@@ -35,25 +35,25 @@ function SettingsPage() {
     {
       icon: "/key.svg",
       text: "Keyless connect",
-      route:"/Account",
+      route:"/Settings/Keyless",
 
     },
     {
       icon: "/help.svg",
       text: "Help & support",
-      route:"/Account",
+      route:"/Settings/Help",
 
     },
     {
       icon: "/telegram.svg",
       text: "Telegram",
-      route:"/Account",
+      route:"https://t.me/ZiptosOnAptos",
 
     },
     {
       icon: "/twitter.svg",
       text: "X (formerly Twitter)",
-      route:"/Account",
+      route:"https://x.com/ZIPTOS",
 
     },
   ];
@@ -112,7 +112,9 @@ function SettingsPage() {
         {menuItems.slice(5).map((item, index) => (
           <div
             key={index}
-            className="flex items-center px-4 py-3 rounded-lg hover:bg-gray-800"
+            className="flex items-center px-4 py-3 rounded-lg cursor-pointer"
+            onClick={() => router.push(item.route)}
+
           
 
 
