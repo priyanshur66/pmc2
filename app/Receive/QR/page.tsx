@@ -35,7 +35,7 @@ const AptosReceive = () => {
       <div className="flex justify-center mb-6">
         <div className="w-48 h-48 mt-6 bg-white p-2 rounded-xl">
           {/* Replace with actual QR code component */}
-          <div className="w-full h-full bg-[url('../public/QR.svg')] flex items-center justify-center">
+          <div className="w-full h-full bg-[url('../public/qr.svg')] flex items-center justify-center">
             <span className="text-white"></span>
           </div>
         </div>
