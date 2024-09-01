@@ -2,6 +2,27 @@
 import React from "react";
 import { BellIcon, Bars3Icon } from "@heroicons/react/16/solid";
 import Navbar from "@/components/Navbar";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import db from "@/firebaseConfig";
+import WebApp from "@twa-dev/sdk";
+import { useState, useEffect } from "react";
+
+interface UserData {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  language_code: string;
+  is_premium?: boolean;
+}
+
+interface MyData {
+  id: string;
+  publicKey: string;
+  userName: number;
+}
+
+
 
 interface MissionCardProps {
   title: string;
@@ -40,6 +61,16 @@ const MissionCard: React.FC<MissionCardProps> = ({
 };
 
 const ZiptosPocket = () => {
+  const [userData, setUserData] = useState<UserData | null>(null)
+
+
+  useEffect(() =>{
+    if (typeof window !== 'undefined') {
+
+    if (WebApp.initDataUnsafe.user) {
+      setUserData(WebApp.initDataUnsafe.user as UserData)
+    } 
+ } })
   return (
     <div className=" bg-[#0F0F0F] text-white min-h-screen ">
       <div className=" items-center w-full">
@@ -57,7 +88,7 @@ const ZiptosPocket = () => {
       alt="Profile"
       className="rounded-full h-4 w-4 mr-2"
     />
-    <span className="text-base font-normal">jandounchained</span>
+    <span className="text-base font-normal">{userData?.username || 'N/A'}</span>
     <img src="/dropdown.svg" alt="" className="ml-4 w-6 h-6" />
   </div>
 
