@@ -42,20 +42,6 @@ interface MyData {
 }
 
 
-// async function fetchDataFromFirestore() {
-//   const querySnapshot = await getDocs(collection(db, "walletUsers"))
-
-//   const data: MyData[] = [];
-//   querySnapshot.forEach((doc) => {
-//     // data.push({ id: doc.id, ...doc.data() as MyData });
-//     const docData = doc.data() as Omit<MyData, 'id'>; 
-//   data.push({ id: doc.id, ...docData });
-//   })
-
-//   return data
-  
-// }
-
 type TabType = 'Tokens' | 'NFTs';
 
 
@@ -94,26 +80,12 @@ const WalletScreen = () => {
   const [activeTab, setActiveTab] = useState<TabType>('Tokens');
   const [userData, setUserData] = useState<UserData | null>(null)
   const [data, setData] = useState<MyData[]>([]);
+  const [isBalanceVisible, setIsBalanceVisible] = useState(true); // State to control balance visibility
   const crypto = require('crypto');
   const algorithm = 'aes-256-cbc';
   const key = crypto.createHash('sha256').update('KEY').digest(); // Create a 32-byte key from the string
   const iv = crypto.randomBytes(16);
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const querySnapshot = await getDocs(collection(db, 'walletUsers'));
-  //       const dataFromFirestore = querySnapshot.docs.map((doc) => ({
-  //         id: doc.id,
-  //         ...doc.data(),
-  //       })) as MyData[]; // Type assertion
-  //       setData(dataFromFirestore);
-  //     } catch (error) {
-  //       console.error("Error fetching data: ", error);
-  //     }
-  //   };
 
-  //   fetchData();
-  // }, []);
 
 
 
@@ -150,7 +122,9 @@ const WalletScreen = () => {
       fetchData();
     }, [userData]);
   
-  
+    const toggleBalanceVisibility = () => {
+      setIsBalanceVisible(!isBalanceVisible); // Toggle balance visibility
+    };
   
   return (
     <div>
@@ -205,9 +179,13 @@ const WalletScreen = () => {
           <div className="bg-[#323030]/40 p-6 mx-4 rounded-xl flex justify-between items-center">
             <div>
               <span className="text-xl text-green-400">Main Balance</span>
-              <h2 className="text-4xl mt-1 font-semibold">$2,172.38</h2>
+              <h2 className="text-4xl mt-1 font-semibold">
+              {isBalanceVisible ? "$2,172.38" : "*****"}
+              </h2>
             </div>
-            <img src="/eye.svg" alt="" className="h-6 w-6" />
+            <img src="/eye.svg" alt="" className="h-6 w-6"
+                          onClick={toggleBalanceVisibility}
+                          />
           </div>
         </div>
 
