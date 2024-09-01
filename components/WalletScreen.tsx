@@ -5,8 +5,43 @@ import {
   Bars3Icon,
   EllipsisVerticalIcon,
 } from "@heroicons/react/16/solid";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import db from "@/firebaseConfig";
+import WebApp from "@twa-dev/sdk";
+
+
+
+interface UserData {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  language_code: string;
+  is_premium?: boolean;
+}
+
+interface MyData {
+  id: string;
+  publicKey: string;
+  userName: number;
+}
+
+
+// async function fetchDataFromFirestore() {
+//   const querySnapshot = await getDocs(collection(db, "walletUsers"))
+
+//   const data: MyData[] = [];
+//   querySnapshot.forEach((doc) => {
+//     // data.push({ id: doc.id, ...doc.data() as MyData });
+//     const docData = doc.data() as Omit<MyData, 'id'>; 
+//   data.push({ id: doc.id, ...docData });
+//   })
+
+//   return data
+  
+// }
 
 type TabType = 'Tokens' | 'NFTs';
 
@@ -14,6 +49,7 @@ type TabType = 'Tokens' | 'NFTs';
 interface TabContentProps {
   activeTab: TabType;
 }
+
 
 
 const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
@@ -37,13 +73,65 @@ const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
     );
   
   }
-  return <p className="text-[#9F9F9F] text-base font-light text-center py-4">You don't have any NFTs yet</p>;
+  return <p className="text-[#9F9F9F] text-base font-light text-center py-4">You don&apos;t have any NFTs yet</p>;
 };
 
 
 const WalletScreen = () => {
   const [activeTab, setActiveTab] = useState<TabType>('Tokens');
+  const [userData, setUserData] = useState<UserData | null>(null)
+  const [data, setData] = useState<MyData[]>([]);
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const querySnapshot = await getDocs(collection(db, 'walletUsers'));
+  //       const dataFromFirestore = querySnapshot.docs.map((doc) => ({
+  //         id: doc.id,
+  //         ...doc.data(),
+  //       })) as MyData[]; // Type assertion
+  //       setData(dataFromFirestore);
+  //     } catch (error) {
+  //       console.error("Error fetching data: ", error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
+
+
+  useEffect(() =>{
+    if (WebApp.initDataUnsafe.user) {
+      setUserData(WebApp.initDataUnsafe.user as UserData)
+    }  })
+
+    console.log(userData?.id)
+
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          if (userData?.id) {
+            const querySnapshot = await getDocs(collection(db, "walletUsers"));
+            const matchedData = querySnapshot.docs
+              .map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+              }))
+              .filter((doc) => doc.id === String(userData.id)) as MyData[];
+      
+            setData(matchedData);
+          }
+        } catch (error) {
+          console.error("Error fetching data: ", error);
+        }
+      };
+  
+      fetchData();
+    }, [userData]);
+  
+  
+  
   return (
     <div>
       <div>
@@ -57,13 +145,30 @@ const WalletScreen = () => {
               />
               <div>
                 <div className="flex items-center ml-2">
-                  <span className="text-lg font-medium">jandounchained</span>
+                  <span className="text-lg font-medium">{userData?.username || 'N/A'}</span>
                   <img src="/dropdown.svg" alt="" className="ml-4 w-6 h-6" />
                 </div>
                 <div className="flex ml-2">
-                  <span className="text-s text-white font-extralight mt-1">
-                    0x418...C8661
+                {/* {data.slice(0,1).map((item) => (
+
+                  <span key={item.id} className="text-s text-white font-extralight mt-1">
+                    {item.publicKey.slice(0,6)}...{item.publicKey.slice(-4)}
                   </span>
+                       ))}  */}
+                       {data.length > 0 ? (
+  <span
+    key={data[0].id}
+    className="text-s text-white font-extralight mt-1"
+  >
+    {data[0].publicKey.slice(0, 6)}...{data[0].publicKey.slice(-4)}
+  </span>
+) : (
+  <span className="text-s text-white font-extralight mt-1">
+    Loading...
+  </span>
+)}
+
+
                   <img src="/copy.svg" alt="" className="ml-2" />
                 </div>
               </div>

@@ -84,7 +84,7 @@ const Receive = () => {
               />
               <input
                 type="text"
-                placeholder="Search or enter dApp URL"
+                placeholder="Search ..."
                 className="w-full py-2 pl-10 rounded-2xl bg-[#494949] text-white placeholder-white focus:outline-none"
               />
             </div>
