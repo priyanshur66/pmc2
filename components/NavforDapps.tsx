@@ -19,10 +19,7 @@ const menus = [
     title: "Token deployer",
     href: "/Dapps/Socials",
   },
-  // {
-  //   title: "Marketplace",
-  //   href: "/Dapps/Marketplace",
-  // },
+
 ];
 
 const NavforDapps = () => {
@@ -37,8 +34,8 @@ const NavforDapps = () => {
             href={menu.href}
             className={`${
               pathName === menu.href
-                ? "text-white border-b-2 border-red-500 pb-1"
-                : "text-gray-400"
+                ? "text-white text-xs border-b-2 border-red-500 pb-1"
+                : "text-gray-400 text-xs"
             }`}
           >
             <button>{menu.title}</button>

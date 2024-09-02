@@ -2,9 +2,24 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "react-feather";
+import dynamic from 'next/dynamic';
+import { useState } from "react";
+import { MoonPayBuyWidget } from '@moonpay/moonpay-react';
+
+// const MoonPayProvider = dynamic(
+//   () => import('@moonpay/moonpay-react').then((mod) => mod.MoonPayProvider),
+//   { ssr: false },
+// );
+
+// const MoonPayBuyWidget = dynamic(
+//   () => import('@moonpay/moonpay-react').then((mod) => mod.MoonPayBuyWidget),
+//   { ssr: false },
+// );
 
 function ComingSoonPage() {
   const router = useRouter();
+  const [visible, setVisible] = useState(false);
+
 
   return (
     <div className="h-screen flex flex-col justify-center items-center bg-[#323030] text-center px-4">
@@ -48,7 +63,6 @@ function ComingSoonPage() {
       <div className="mt-32">
         <div className="flex justify-center mb-6">
           <img src="/clock.svg" alt="" />
-
           
         </div>
         <p className="text-white font-semibold text-lg">Coming Soon</p>
@@ -56,6 +70,16 @@ function ComingSoonPage() {
           Please be patient while we curate these features shortly
         </p>
       </div>
+      <MoonPayBuyWidget
+      variant="overlay"
+      baseCurrencyCode="usd"
+      baseCurrencyAmount="100"
+      defaultCurrencyCode="eth"
+      visible={visible}
+    />
+    <button onClick={() => setVisible(!visible)}>
+      Toggle widget
+    </button>
     </div>
   );
 }

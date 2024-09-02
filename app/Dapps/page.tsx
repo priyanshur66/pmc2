@@ -2,6 +2,7 @@
 import Navbar from "@/components/Navbar";
 import React from "react";
 import NavforDapps from "@/components/NavforDapps";
+import { useState, useRef, useEffect } from "react";
 interface TokenCardProps {
   name: string;
   symbol: string;
@@ -12,6 +13,35 @@ interface TokenCardProps {
 }
 
 function Layout({ children }: { children: React.ReactNode }) {
+  const [scrollY, setScrollY] = useState(0);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startY, setStartY] = useState(0);
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    setStartY(e.touches[0].clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    const deltaY = startY - e.touches[0].clientY;
+    setScrollY((prevScrollY) => {
+      const newScrollY = prevScrollY + deltaY;
+      return Math.max(0, newScrollY);
+    });
+    setStartY(e.touches[0].clientY);
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTop = scrollY;
+    }
+  }, [scrollY]);
   return (
     <div className="bg-[#0F0F0F] min-h-screen text-white">
       <div className="items-center w-full">
@@ -38,10 +68,18 @@ function Layout({ children }: { children: React.ReactNode }) {
         <NavforDapps />
 
         {/* DApp Card */}
+        <div 
+        className="flex-grow overflow-hidden"
+        ref={contentRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div className="flex flex-col">{children}</div>
       </div>
 
       <Navbar />
+    </div>
     </div>
   );
 }

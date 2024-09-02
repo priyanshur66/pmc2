@@ -8,6 +8,7 @@ import {
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { getDoc, setDoc } from "firebase/firestore";
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
 import {
@@ -24,6 +25,8 @@ import {
   Ed25519Account,
   U8,
 } from "@aptos-labs/ts-sdk";
+import crypto from 'crypto';
+
 
 
 interface UserData {
@@ -39,6 +42,10 @@ interface MyData {
   id: string;
   publicKey: string;
   userName: number;
+  iv: string;
+  referralLink: string;
+  referredBy: string;
+  encryptedData: string;
 }
 
 
@@ -50,6 +57,15 @@ interface TabContentProps {
 }
 
 
+function encrypt(text: string, key: Buffer, iv: Buffer) {
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+  let encryptedData = cipher.update(text, 'utf8', 'hex');
+  encryptedData += cipher.final('hex');
+  return {
+    iv: iv.toString('hex'),
+    encryptedData: encryptedData,
+  };
+}
 
 const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
   if (activeTab === 'Tokens') {
@@ -101,7 +117,7 @@ const WalletScreen = () => {
     console.log(userData?.id)
 
     useEffect(() => {
-      const fetchData = async () => {
+      const fetchData = async (msg: any) => {
         try {
           if (userData?.id) {
             const querySnapshot = await getDocs(collection(db, "walletUsers"));
@@ -114,17 +130,61 @@ const WalletScreen = () => {
       
             setData(matchedData);
           }
+          else {
+
+
+            const walletRef = doc(db, 'walletUsers', (msg.chat.id).toString());
+            const docSnap = await getDoc(walletRef);
+        
+            if (!docSnap.exists()) {
+              const bob = Account.generate();
+              const encrypted = encrypt(bob.privateKey.toString(),key, iv);
+        
+              const referredBy = msg.text.split(" ")[1] || null;
+        
+              // Generate unique referral link
+              const userReferralLink = `https://t.me/ZiptosWalletBot?start=${msg.chat.id}`;
+        
+              const dataToStore: any = {
+                publicKey: bob.accountAddress.toString(),
+                telegramId: msg.chat.id,
+                iv: encrypted.iv,
+                encryptedData: encrypted.encryptedData,
+                referralLink: userReferralLink,
+                referredBy: referredBy,
+              };
+        
+        
+              // Check if username exists, then add it to the stored data
+              if (msg.chat.username) {
+                dataToStore.userName = msg.chat.username;
+              }
+      
+              await setDoc(walletRef, dataToStore, { merge: true });
+            }
+          }
         } catch (error) {
           console.error("Error fetching data: ", error);
         }
       };
+
+      const msg = {
+        chat: {
+          id: userData?.id,
+          username: userData?.username || 'N/A',
+        },
+        text: '', // Set appropriate text if needed
+      };
   
-      fetchData();
+      fetchData(msg);
     }, [userData]);
   
     const toggleBalanceVisibility = () => {
       setIsBalanceVisible(!isBalanceVisible); // Toggle balance visibility
     };
+
+
+    
   
   return (
     <div>
