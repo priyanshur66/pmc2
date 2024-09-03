@@ -3,16 +3,25 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "react-feather";
 import dynamic from 'next/dynamic';
-import { useState } from "react";
-import { MoonPayBuyWidget, MoonPayProvider } from '@moonpay/moonpay-react';
+// import { MoonPayBuyWidget, MoonPayProvider } from '@moonpay/moonpay-react';
 
+const MoonPayBuyWidget = dynamic(
+  () => import('@moonpay/moonpay-react').then((mod) => mod.MoonPayBuyWidget),
+  { ssr: false }
+);
 
+const MoonPayProvider = dynamic(
+  () => import('@moonpay/moonpay-react').then((mod) => mod.MoonPayProvider),
+  { ssr: false }
+);
 function ComingSoonPage() {
+
   const router = useRouter();
-  const [visible, setVisible] = useState(false);
+
 
 
   return (
+    
     <MoonPayProvider
     apiKey="pk_test_CiQCSl011smuhjyiYH6YRcdQRBrUw3"
     debug
@@ -81,7 +90,7 @@ function ComingSoonPage() {
     </MoonPayProvider>
 
   );
-  
 }
+  
 
 export default ComingSoonPage;

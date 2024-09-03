@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import localFont from 'next/font/local';
 import "./globals.css";
 import Script from "next/script";
-
+import { MoonPayProvider } from "@moonpay/moonpay-react";
 const inter = Inter({ subsets: ["latin"] });
 const myFont = localFont({ src: './PostGrotesk-Book.woff2' })
 
@@ -20,11 +20,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+  //     <MoonPayProvider
+  //     apiKey="pk_test_CiQCSl011smuhjyiYH6YRcdQRBrUw3"
+  //     debug
+  // >
+  
     <html lang="en">
     <head>
     <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
     </head>
       <body className={myFont.className}>{children}</body>
     </html>
+    // </MoonPayProvider>
   );
 }
