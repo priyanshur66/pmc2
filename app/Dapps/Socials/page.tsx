@@ -2,6 +2,7 @@
 import Navbar from "@/components/Navbar";
 import React from "react";
 import NavforDapps from "@/components/NavforDapps";
+import SwipeNavigator from "@/components/SwipeNavigator";
 interface TokenCardProps {
   name: string;
   symbol: string;
@@ -87,6 +88,7 @@ const TokenCard: React.FC<TokenCardProps> = ({
 
 const page = () => {
   return (
+    <SwipeNavigator currentPage="socials">
     <Layout>
       <div className="px-4 py-2 space-y-4">
         <div className="bg-[#4848487A] rounded-xl p-4 flex justify-between items-center ">
@@ -149,6 +151,7 @@ const page = () => {
         />
       </div>
     </Layout>
+    </SwipeNavigator>
   );
 };
 

@@ -5,10 +5,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "react-feather";
 
+
+
 function SettingsPage() {
 
-  const [choose, setChoose] = useState(true);
   const router = useRouter();
+
+
 
 
 

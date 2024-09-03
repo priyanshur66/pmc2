@@ -3,12 +3,34 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "react-feather";
+import WebApp from "@twa-dev/sdk";
+import { useState, useEffect } from "react";
+
+interface UserData {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  language_code: string;
+  is_premium?: boolean;
+}
 const AccountDetails = () => {
   const router = useRouter();
+  const [userData, setUserData] = useState<UserData | null>(null)
+
+  useEffect(() =>{
+    if (typeof window !== 'undefined') {
+
+    if (WebApp.initDataUnsafe.user) {
+      setUserData(WebApp.initDataUnsafe.user as UserData)
+    } 
+ } })
+
+
 
   const accounts = [
     {
-      name: "Jandounchaind",
+      name: "",
       address: "0x41...c866",
       icon: "/ziptos.svg", // Replace with your actual icon path
       isSelected: true,
@@ -40,7 +62,7 @@ const AccountDetails = () => {
               className="rounded-full"
             />
             <div className="ml-4">
-              <p className="text-white font-semibold">{account.name}</p>
+              <p className="text-white font-semibold">{userData?.username || 'N/A'}</p>
               <p className="text-gray-400">{account.address}</p>
             </div>
           </div>

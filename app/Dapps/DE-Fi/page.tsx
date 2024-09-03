@@ -2,6 +2,7 @@
 import Navbar from "@/components/Navbar";
 import React from "react";
 import NavforDapps from "@/components/NavforDapps";
+import SwipeNavigator from "@/components/SwipeNavigator";
 interface TokenCardProps {
   name: string;
   symbol: string;
@@ -13,6 +14,7 @@ interface TokenCardProps {
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
+    
     <div className="bg-[#0F0F0F] min-h-screen text-white">
       <div className="items-center w-full">
         {/* <div className=" bg-[#0F0F0F] text-white h-screen items-center w-full px-4 py-6 space-y-4">
@@ -87,6 +89,7 @@ const TokenCard: React.FC<TokenCardProps> = ({
 
 const page = () => {
   return (
+    <SwipeNavigator currentPage="de-fi">
     <Layout>
       <div className="px-4 py-2 space-y-4">
         <div className="bg-[#4848487A] rounded-xl p-4 flex justify-between items-center ">
@@ -169,6 +172,7 @@ const page = () => {
         />
       </div>
     </Layout>
+    </SwipeNavigator>
   );
 };
 
