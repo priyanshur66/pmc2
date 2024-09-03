@@ -4,17 +4,8 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "react-feather";
 import dynamic from 'next/dynamic';
 import { useState } from "react";
-import { MoonPayBuyWidget } from '@moonpay/moonpay-react';
+import { MoonPayBuyWidget, MoonPayProvider } from '@moonpay/moonpay-react';
 
-// const MoonPayProvider = dynamic(
-//   () => import('@moonpay/moonpay-react').then((mod) => mod.MoonPayProvider),
-//   { ssr: false },
-// );
-
-// const MoonPayBuyWidget = dynamic(
-//   () => import('@moonpay/moonpay-react').then((mod) => mod.MoonPayBuyWidget),
-//   { ssr: false },
-// );
 
 function ComingSoonPage() {
   const router = useRouter();
@@ -22,6 +13,11 @@ function ComingSoonPage() {
 
 
   return (
+    <MoonPayProvider
+    apiKey="pk_test_CiQCSl011smuhjyiYH6YRcdQRBrUw3"
+    debug
+>
+
     <div className="h-screen flex flex-col justify-center items-center bg-[#323030] text-center px-4">
       {/* Back button */}
       <div className="absolute top-4 left-4" >
@@ -46,7 +42,7 @@ function ComingSoonPage() {
             className="w-full px-4 py-2 rounded-full bg-[#0F0F0F] text-white placeholder-gray-500"
           />
         </div> */}
-                    <div className="relative w-[90%]">
+                    {/* <div className="relative w-[90%]">
               <img
                 src="/search.svg"
                 alt=""
@@ -57,10 +53,10 @@ function ComingSoonPage() {
                 placeholder="Search ..."
                 className="w-full p-2 pl-10 rounded-2xl bg-[#212020] text-white placeholder-white focus:outline-none border border-[#5E5E5E]"
               />
-            </div>
+            </div> */}
       </div>
 
-      <div className="mt-32">
+      {/* <div className="mt-32">
         <div className="flex justify-center mb-6">
           <img src="/clock.svg" alt="" />
           
@@ -69,19 +65,23 @@ function ComingSoonPage() {
         <p className="text-gray-400 mt-2">
           Please be patient while we curate these features shortly
         </p>
-      </div>
+      </div> */}
       <MoonPayBuyWidget
-      variant="overlay"
-      baseCurrencyCode="usd"
-      baseCurrencyAmount="100"
-      defaultCurrencyCode="eth"
-      visible={visible}
-    />
-    <button onClick={() => setVisible(!visible)}>
+            variant="overlay"
+            baseCurrencyCode="usd"
+            baseCurrencyAmount="100"
+            defaultCurrencyCode="eth"
+            visible
+        />
+
+    {/* <button onClick={() => setVisible(!visible)}>
       Toggle widget
-    </button>
+    </button> */}
     </div>
+    </MoonPayProvider>
+
   );
+  
 }
 
 export default ComingSoonPage;
