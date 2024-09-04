@@ -46,10 +46,8 @@ const TokenCard: React.FC<TokenCardProps> = ({
         </a>
 
         <div className='flex flex-col'>
-        {/* <span className="text-white font-bold text-end">{symbol}</span> */}
-        {/* <span className='text-white'>$0.00</span> */}
+       
         </div>
-
       </div>
       
 
@@ -57,12 +55,7 @@ const TokenCard: React.FC<TokenCardProps> = ({
     );
   };
 
-const Send = async () => {
-
-  
-
-
-
+const Send = () => {
 
     const router = useRouter();
 
@@ -95,13 +88,7 @@ const Send = async () => {
               />
             </div>
           </div>
-      {/* <div className="mb-4 mt-6">
-        <button className="flex items-center bg-[#434343] rounded-2xl px-4 py-2">
-            <img src="/i.svg" alt=""/>
-          <span className="flex-grow text-left ml-2">All Networks</span>
-          <img src='/dropdown.svg' alt='' className='ml-4'/>
-        </button>
-      </div> */}
+
 
 
     <TokenCard
