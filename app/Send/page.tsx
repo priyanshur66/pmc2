@@ -2,6 +2,7 @@
 import React from 'react';
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Link } from "react-feather";
+import { Aptos} from '@aptos-labs/ts-sdk';
 
 interface TokenCardProps {
     name: string;
@@ -56,7 +57,12 @@ const TokenCard: React.FC<TokenCardProps> = ({
     );
   };
 
-const Send = () => {
+const Send = async () => {
+
+  
+
+
+
 
     const router = useRouter();
 
