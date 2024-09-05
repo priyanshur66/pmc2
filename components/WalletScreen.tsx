@@ -11,6 +11,8 @@ import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } 
 import { getDoc, setDoc } from "firebase/firestore";
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
+import axios from 'axios';
+
 import {
   Account,
   AccountAddress,
@@ -67,7 +69,37 @@ function encrypt(text: string, key: Buffer, iv: Buffer) {
   };
 }
 
+
 const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
+  const [price, setPrice] = useState(null);
+  const [pnl, setPnl] = useState(null);
+
+
+  useEffect(() => {
+    const fetchPriceAndPnl = async () => {
+      try {
+        const response = await axios.get(
+          'https://api.coingecko.com/api/v3/coins/markets',
+          {
+            params: {
+              vs_currency: 'usd',
+              ids: 'aptos',
+            },
+          }
+        );
+
+        const coinData = response.data[0];
+        setPrice(coinData.current_price);
+        setPnl(coinData.price_change_percentage_24h);
+      } catch (error) {
+        console.error('Error fetching APT price and PnL:', error);
+      }
+    };
+
+    fetchPriceAndPnl();
+  }, []);
+
+
   if (activeTab === 'Tokens') {
     return (
       <div className="flex items-center justify-between">
@@ -75,12 +107,12 @@ const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
               <div className="w-10 h-10 bg-[url('../public/aptos.svg')] rounded-full"></div>{" "}
               <div className="grid-rows-2">
                 <p className="font-semibold px-4 text-xl">Aptos</p>
-                <p className="font-light px-4 text-s mt-1">521.90Apt</p>
+                <p className="font-light px-4 text-s mt-1">100 APT</p>
               </div>
             </div> 
             <div className="grid-rows-2">
-              <p className="text-xl font-bold">$2,142.28</p>
-              <p className="text-sm text-green-400">+0.91%</p>
+              <p className="text-xl font-bold">${Number(price || 0) * 100}</p>
+              <p className="text-sm text-green-400">{pnl}%</p>
             </div>
       </div>
             
@@ -184,7 +216,6 @@ const WalletScreen = () => {
     };
 
 
-    
   
   return (
     <div>
@@ -203,12 +234,6 @@ const WalletScreen = () => {
                   <img src="/dropdown.svg" alt="" className="ml-4 w-6 h-6" />
                 </div>
                 <div className="flex ml-2">
-                {/* {data.slice(0,1).map((item) => (
-
-                  <span key={item.id} className="text-s text-white font-extralight mt-1">
-                    {item.publicKey.slice(0,6)}...{item.publicKey.slice(-4)}
-                  </span>
-                       ))}  */}
                        {data.length > 0 ? (
   <span
     key={data[0].id}
@@ -235,7 +260,7 @@ const WalletScreen = () => {
             </div>
           </div>
         </div>
-        <div className="px-4 py-6 space-x-4">
+        <div className="px-4 mb-4 space-x-4">
           <div className="bg-[#323030]/40 p-6 mx-4 rounded-xl flex justify-between items-center">
             <div>
               <span className="text-xl text-green-400">Main Balance</span>
@@ -331,17 +356,6 @@ const WalletScreen = () => {
 
         <div className="px-4 pt-4 pb-20 space-y-4">
           <div className="bg-[#484848]/50 rounded-lg w-full p-4 ">
-            {/* <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-[url('../public/aptos.svg')] rounded-full"></div>{" "}
-              <div className="grid-rows-2">
-                <p className="font-semibold px-4 text-xl">Aptos</p>
-                <p className="font-light px-4 text-s mt-1">521.90Apt</p>
-              </div>
-            </div> */}
-            {/* <div className="grid-rows-2">
-              <p className="text-xl font-bold">$2,142.28</p>
-              <p className="text-sm text-green-400">+0.91%</p>
-            </div> */}
 
         <TabContent activeTab={activeTab} />
 

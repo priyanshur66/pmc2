@@ -135,9 +135,9 @@ const page = () => {
               className="w-12 h-12 rounded-full mr-4"
             />
             <div>
-              <h2 className="text-lg font-bold">Ziployer</h2>
+              <h2 className="text-lg font-bold">Zipswap</h2>
               <p className="text-sm text-gray-200 font-extralight">
-                Lorem ipsum dolor sit amet, consec..{" "}
+              Fastest telegram based swap{" "}
               </p>
             </div>
           </div>
