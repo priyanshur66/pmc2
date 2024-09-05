@@ -107,14 +107,23 @@ const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
               <div className="w-10 h-10 bg-[url('../public/aptos.svg')] rounded-full"></div>{" "}
               <div className="grid-rows-2">
                 <p className="font-semibold px-4 text-xl">Aptos</p>
-                <p className="font-light px-4 text-s mt-1">100 APT</p>
+                <p className="font-light px-4 text-s mt-1">
+                  ${price}
+                  <span className={pnl !== null && pnl >= 0 ? 'ml-1 text-green-500' : 'ml-1 text-red-500'}>
+                  {pnl !== null ?  String(pnl).slice(0, 4) : 'N/A'}%
+                  </span>
+                  
+                </p>
+
               </div>
             </div> 
-            <div className="grid-rows-2">
-              <p className="text-xl font-bold">${Number(price || 0) * 100}</p>
-              <p className="text-sm text-green-400">{pnl}%</p>
+            <div className="flex flex-col items-end">
+              <p className="text-xl font-bold">100 APT</p>
+              <p className="text-lg font-light">
+              ${Number(price || 0) * 100}              </p>
             </div>
       </div>
+
             
 
     );

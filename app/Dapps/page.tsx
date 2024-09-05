@@ -95,7 +95,7 @@ const TokenCard: React.FC<TokenCardProps> = ({
 }) => {
   return (
     <div className="bg-[#4848487A] rounded-lg p-4 flex justify-between items-center mb-4 shadow-lg">
-      {/* <div className="bg-gradient-to-b from-[#F33439]/25  to-[#0F0F0F]  inset-0"> */}
+      
 
       <div className="flex items-center">
         <img
