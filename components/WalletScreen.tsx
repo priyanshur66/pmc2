@@ -28,7 +28,6 @@ import {
   U8,
 } from "@aptos-labs/ts-sdk";
 import crypto from 'crypto';
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
 
 
@@ -71,28 +70,10 @@ interface TabContentProps {
 }
 
 
-function encrypt(text: string, key: Buffer, iv: Buffer) {
-  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-  let encryptedData = cipher.update(text, 'utf8', 'hex');
-  encryptedData += cipher.final('hex');
-  return {
-    iv: iv.toString('hex'),
-    encryptedData: encryptedData,
-  };
-}
-
 
 const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
   const [price, setPrice] = useState(null);
   const [pnl, setPnl] = useState(null);
-  const { account } = useWallet();
-  const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
-
-  
-
-
-
-
 
   useEffect(() => {
     const fetchPriceAndPnl = async () => {
@@ -158,10 +139,7 @@ const WalletScreen = () => {
   const [data, setData] = useState<MyData[]>([]);
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
   const [isBalanceVisible, setIsBalanceVisible] = useState(true); // State to control balance visibility
-  const crypto = require('crypto');
-  const algorithm = 'aes-256-cbc';
-  const key = crypto.createHash('sha256').update('KEY').digest(); // Create a 32-byte key from the string
-  const iv = crypto.randomBytes(16);
+
 
 
 
@@ -258,41 +236,9 @@ const WalletScreen = () => {
       
             setData(matchedData);
           }
-          else {
-
-
-            const walletRef = doc(db, 'walletUsers', (msg.chat.id).toString());
-            const docSnap = await getDoc(walletRef);
-        
-            if (!docSnap.exists()) {
-              const bob = Account.generate();
-              console.log(bob)
-              const encrypted = encrypt(bob.privateKey.toString(),key, iv);
-        
-              const referredBy = msg.text.split(" ")[1] || null;
-        
-              // Generate unique referral link
-              const userReferralLink = `https://t.me/ZiptosWalletBot?start=${msg.chat.id}`;
-        
-              const dataToStore: any = {
-                publicKey: bob.accountAddress.toString(),
-                telegramId: msg.chat.id,
-                iv: encrypted.iv,
-                encryptedData: encrypted.encryptedData,
-                referralLink: userReferralLink,
-                referredBy: referredBy,
-              };
-        
-        
-              // Check if username exists, then add it to the stored data
-              if (msg.chat.username) {
-                dataToStore.userName = msg.chat.username;
-              }
-      
-              await setDoc(walletRef, dataToStore, { merge: true });
-            }
-          }
-        } catch (error) {
+         
+        } 
+        catch (error) {
           console.error("Error fetching data: ", error);
         }
       };
