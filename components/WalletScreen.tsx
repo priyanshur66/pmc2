@@ -88,70 +88,11 @@ const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
   const { account } = useWallet();
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
 
-  useEffect(() => {
-    if (account?.address) {
-      fetchTokenBalances(account.address.toString());
-    }
-  }, [account]);
+  
 
-  const fetchTokenBalances = async (address: string) => {
-    const TokensCollectionurl = 'https://api.testnet.aptoslabs.com/v1';
-    const query = `
-      query MyQuery {
-        current_fungible_asset_balances(
-          where: {owner_address: {_eq: "${address}"}, amount: {_gt: "0"}}
-        ) {
-          owner_address
-          amount
-          metadata {
-            asset_type
-            name
-            supply_v2
-            symbol
-            token_standard
-            decimals
-          }
-          token_standard
-        }
-      }
-    `;
 
-    try {
-      const response = await axios.post(TokensCollectionurl, { query });
-      const balances = response.data.data.current_fungible_asset_balances;
-      
-      const tempArray: TokenBalance[] = [];
-      
-      for (const balance of balances) {
-        const tokenDecimals = balance.metadata.decimals;
-        const tokenBalance = balance.amount;
-        const tokenName = balance.metadata.name;
-        const tokenContractAddress = balance.metadata.asset_type;
-        const tokenStandard = balance.token_standard;
-        const formattedTokenBalance = tokenBalance / (10 ** tokenDecimals);
-        
-        if (tokenStandard === 'v1' && !tokenName.includes('LP')) {
-          tempArray.push({
-            name: tokenName,
-            balance: formattedTokenBalance,
-            contractAddress: tokenContractAddress,
-            standard: tokenStandard
-          });
-        } else if (tokenStandard === 'v2') {
-          tempArray.push({
-            name: tokenName,
-            balance: formattedTokenBalance,
-            contractAddress: tokenContractAddress,
-            standard: tokenStandard
-          });
-        }
-      }
-      
-      setTokenBalances(tempArray);
-    } catch (error) {
-      console.error('Error fetching token balances:', error);
-    }
-  };
+
+
 
   useEffect(() => {
     const fetchPriceAndPnl = async () => {
@@ -184,17 +125,14 @@ const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
          <div className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-[url('../public/aptos.svg')] rounded-full"></div>{" "}
               <div className="grid-rows-2">
-              {tokenBalances.map((token, index) => (
-
-                <p key={index} className="font-semibold px-4 text-xl">  {token.name}</p>
-                // <p className="font-light px-4 text-s mt-1">
-                //   ${price}
-                //  <span className={pnl !== null && pnl >= 0 ? 'ml-1 text-green-500' : 'ml-1 text-red-500'}>
-                //   {pnl !== null ?  String(pnl).slice(0, 4) : 'N/A'}%
-                //   </span>
+                <p className="font-semibold px-4 text-xl">Aptos</p>
+                <p className="font-light px-4 text-s mt-1">
+                  ${price}
+                  <span className={pnl !== null && pnl >= 0 ? 'ml-1 text-green-500' : 'ml-1 text-red-500'}>
+                  {pnl !== null ?  String(pnl).slice(0, 4) : 'N/A'}%
+                  </span>
                   
-                // </p>
-                          ))}
+                </p>
 
               </div>
             </div> 
@@ -202,7 +140,6 @@ const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
               <p className="text-xl font-bold">100 APT</p>
               <p className="text-lg font-light">
               ${Number(price || 0) * 100}              </p>
-
             </div>
       </div>
 
@@ -219,6 +156,7 @@ const WalletScreen = () => {
   const [activeTab, setActiveTab] = useState<TabType>('Tokens');
   const [userData, setUserData] = useState<UserData | null>(null)
   const [data, setData] = useState<MyData[]>([]);
+  const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
   const [isBalanceVisible, setIsBalanceVisible] = useState(true); // State to control balance visibility
   const crypto = require('crypto');
   const algorithm = 'aes-256-cbc';
@@ -227,6 +165,73 @@ const WalletScreen = () => {
 
 
 
+
+
+  const fetchTokenBalances = async (publicKey: string) => {
+    const TokensCollectionurl = 'https://api.mainnet.aptoslabs.com/v1/graphql';
+    const query = `
+      query MyQuery {
+        current_fungible_asset_balances(
+          where: {owner_address: {_eq: "${publicKey}"}, amount: {_gt: "0"}}
+        ) {
+          owner_address
+          amount
+          metadata {
+            asset_type
+            name
+            supply_v2
+            symbol
+            token_standard
+            decimals
+          }
+          token_standard
+        }
+      }
+    `;
+  
+    try {
+      const response = await axios.post(TokensCollectionurl, { query });
+      const balances = response.data.data.current_fungible_asset_balances;
+  
+      const tempArray: TokenBalance[] = [];
+  
+      for (const balance of balances) {
+        const tokenDecimals = balance.metadata.decimals;
+        const tokenBalance = balance.amount;
+        const tokenName = balance.metadata.name;
+        const tokenContractAddress = balance.metadata.asset_type;
+        const tokenStandard = balance.token_standard;
+        const formattedTokenBalance = tokenBalance / (10 ** tokenDecimals);
+  
+        if (tokenStandard === 'v1' && !tokenName.includes('LP')) {
+          tempArray.push({
+            name: tokenName,
+            balance: formattedTokenBalance,
+            contractAddress: tokenContractAddress,
+            standard: tokenStandard
+          });
+        } else if (tokenStandard === 'v2') {
+          tempArray.push({
+            name: tokenName,
+            balance: formattedTokenBalance,
+            contractAddress: tokenContractAddress,
+            standard: tokenStandard
+          });
+        }
+      }
+  
+      setTokenBalances(tempArray);
+    } catch (error) {
+      console.error('Error fetching token balances:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    if (data.length > 0) {
+      fetchTokenBalances(data[0].publicKey);
+    }
+  }, [data, fetchTokenBalances]);
 
   useEffect(() =>{
     if (typeof window !== 'undefined') {
@@ -326,18 +331,18 @@ const WalletScreen = () => {
                   <img src="/dropdown.svg" alt="" className="ml-4 w-6 h-6" />
                 </div>
                 <div className="flex ml-2">
-                       {data.length > 0 ? (
-  <span
-    key={data[0].id}
-    className="text-s text-white font-extralight mt-1"
-  >
-    {data[0].publicKey.slice(0, 6)}...{data[0].publicKey.slice(-4)}
-  </span>
-) : (
-  <span className="text-s text-white font-extralight mt-1">
-    Loading...
-  </span>
-)}
+                        {data.length > 0 ? (
+    <span
+      key={data[0].id}
+      className="text-s text-white font-extralight mt-1"
+    >
+      {data[0].publicKey.slice(0, 6)}...{data[0].publicKey.slice(-4)}
+    </span>
+  ) : (
+    <span className="text-s text-white font-extralight mt-1">
+      Loading...
+    </span>
+  )}
 
 
                   <img src="/copy.svg" alt="" className="ml-2" />
@@ -449,7 +454,31 @@ const WalletScreen = () => {
         <div className="px-4 pt-4 pb-20 space-y-4">
           <div className="bg-[#484848]/50 rounded-lg w-full p-4 ">
 
-        <TabContent activeTab={activeTab} />
+        {/* <TabContent activeTab={activeTab} /> */}
+
+        {tokenBalances.length > 0 ? (
+          <div className="mt-4 space-y-4">
+            {tokenBalances.map((token, index) => (
+              <div key={index} className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <div className="w-10 h-10 bg-[#484848]/50 rounded-full flex items-center justify-center">
+                    <span className="text-lg font-medium">{token.name.charAt(0)}</span>
+                  </div>
+                  <div>
+                    <p className="font-medium">{token.name}</p>
+                    <p className="text-s text-[#9F9F9F]">{token.balance.toFixed(2)} {token.standard === 'v1' ? 'v1' : 'v2'}</p>
+                  </div>
+                </div>
+                {/* <p className="text-lg font-light">${(token.balance * (price || 0)).toFixed(2)}</p> */}
+              </div>
+            ))}
+            </div>
+        ) : (
+          <p className="text-[#9F9F9F] text-base font-light text-center py-4">
+            You don&apos;t have any tokens yet
+          </p>
+        )}
+
 
           </div>
         </div>
