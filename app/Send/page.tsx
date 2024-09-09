@@ -184,10 +184,10 @@ const TokenCard: React.FC<TokenCardProps> = ({
 
           <div key={index}>
             <h2 className="text-lg font-bold">
-            {token.name.charAt(0)}
+            {token.name}
             </h2>
             <p className="text-sm text-white">
-            {token.balance.toFixed(2)}{" "}
+            {token.balance.toFixed(2)}{" "}{token.name.charAt(0)}
               {/* <span
                 className={changePositive ? "text-green-500" : "text-red-500"}
               >
