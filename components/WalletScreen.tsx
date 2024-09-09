@@ -28,8 +28,20 @@ import {
   U8,
 } from "@aptos-labs/ts-sdk";
 import crypto from 'crypto';
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
 
+
+const aptosConfig = new AptosConfig({ network: Network.TESTNET });
+export const aptos = new Aptos(aptosConfig);
+
+
+interface TokenBalance {
+  name: string;
+  balance: number;
+  contractAddress: string;
+  standard: string;
+}
 
 interface UserData {
   id: number;
@@ -73,7 +85,73 @@ function encrypt(text: string, key: Buffer, iv: Buffer) {
 const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
   const [price, setPrice] = useState(null);
   const [pnl, setPnl] = useState(null);
+  const { account } = useWallet();
+  const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
 
+  useEffect(() => {
+    if (account?.address) {
+      fetchTokenBalances(account.address.toString());
+    }
+  }, [account]);
+
+  const fetchTokenBalances = async (address: string) => {
+    const TokensCollectionurl = 'https://api.testnet.aptoslabs.com/v1';
+    const query = `
+      query MyQuery {
+        current_fungible_asset_balances(
+          where: {owner_address: {_eq: "${address}"}, amount: {_gt: "0"}}
+        ) {
+          owner_address
+          amount
+          metadata {
+            asset_type
+            name
+            supply_v2
+            symbol
+            token_standard
+            decimals
+          }
+          token_standard
+        }
+      }
+    `;
+
+    try {
+      const response = await axios.post(TokensCollectionurl, { query });
+      const balances = response.data.data.current_fungible_asset_balances;
+      
+      const tempArray: TokenBalance[] = [];
+      
+      for (const balance of balances) {
+        const tokenDecimals = balance.metadata.decimals;
+        const tokenBalance = balance.amount;
+        const tokenName = balance.metadata.name;
+        const tokenContractAddress = balance.metadata.asset_type;
+        const tokenStandard = balance.token_standard;
+        const formattedTokenBalance = tokenBalance / (10 ** tokenDecimals);
+        
+        if (tokenStandard === 'v1' && !tokenName.includes('LP')) {
+          tempArray.push({
+            name: tokenName,
+            balance: formattedTokenBalance,
+            contractAddress: tokenContractAddress,
+            standard: tokenStandard
+          });
+        } else if (tokenStandard === 'v2') {
+          tempArray.push({
+            name: tokenName,
+            balance: formattedTokenBalance,
+            contractAddress: tokenContractAddress,
+            standard: tokenStandard
+          });
+        }
+      }
+      
+      setTokenBalances(tempArray);
+    } catch (error) {
+      console.error('Error fetching token balances:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchPriceAndPnl = async () => {
@@ -106,14 +184,17 @@ const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
          <div className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-[url('../public/aptos.svg')] rounded-full"></div>{" "}
               <div className="grid-rows-2">
-                <p className="font-semibold px-4 text-xl">Aptos</p>
-                <p className="font-light px-4 text-s mt-1">
-                  ${price}
-                  <span className={pnl !== null && pnl >= 0 ? 'ml-1 text-green-500' : 'ml-1 text-red-500'}>
-                  {pnl !== null ?  String(pnl).slice(0, 4) : 'N/A'}%
-                  </span>
+              {tokenBalances.map((token, index) => (
+
+                <p key={index} className="font-semibold px-4 text-xl">  {token.name}</p>
+                // <p className="font-light px-4 text-s mt-1">
+                //   ${price}
+                //  <span className={pnl !== null && pnl >= 0 ? 'ml-1 text-green-500' : 'ml-1 text-red-500'}>
+                //   {pnl !== null ?  String(pnl).slice(0, 4) : 'N/A'}%
+                //   </span>
                   
-                </p>
+                // </p>
+                          ))}
 
               </div>
             </div> 
@@ -121,6 +202,7 @@ const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
               <p className="text-xl font-bold">100 APT</p>
               <p className="text-lg font-light">
               ${Number(price || 0) * 100}              </p>
+
             </div>
       </div>
 
@@ -179,6 +261,7 @@ const WalletScreen = () => {
         
             if (!docSnap.exists()) {
               const bob = Account.generate();
+              console.log(bob)
               const encrypted = encrypt(bob.privateKey.toString(),key, iv);
         
               const referredBy = msg.text.split(" ")[1] || null;
