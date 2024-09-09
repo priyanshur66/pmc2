@@ -168,7 +168,7 @@ const WalletScreen = () => {
 
 
   const fetchTokenBalances = async (publicKey: string) => {
-    const TokensCollectionurl = 'https://api.mainnet.aptoslabs.com/v1/graphql';
+    const TokensCollectionurl = 'https://api.testnet.aptoslabs.com/v1/graphql';
     const query = `
       query MyQuery {
         current_fungible_asset_balances(
@@ -462,7 +462,7 @@ const WalletScreen = () => {
               <div key={index} className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <div className="w-10 h-10 bg-[#484848]/50 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-medium">{token.name.charAt(0)}</span>
+                    <span className="text-lg text-white font-medium">{token.name.charAt(0)}</span>
                   </div>
                   <div>
                     <p className="font-medium">{token.name}</p>
