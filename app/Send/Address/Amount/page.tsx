@@ -2,9 +2,11 @@
 import React, { useState, ChangeEvent } from "react";
 import {
   ArrowLeft,
-  // PenSquare
 } from "react-feather";
 import { useRouter } from 'next/navigation';
+import { aptos } from '@/components/WalletScreen';
+
+
 
 
 export default function EnterAmount(): JSX.Element {
@@ -12,6 +14,8 @@ export default function EnterAmount(): JSX.Element {
   const [amountUSD, setAmountUSD] = useState<number>(0);
   const availableAmount: number = 512.34;
   const router = useRouter();
+  const [transferFunction, setTransferFunction] = useState<((contractAddress: string, toAddress: string, amount: string) => Promise<string>) | null>(null);
+
 
 
   const handleAmountChange = (value: string): void => {
@@ -27,17 +31,30 @@ export default function EnterAmount(): JSX.Element {
     setAmountUSD(availableAmount);
   };
 
+  async function transferLegacyCoin(sender: any, contractAddress: string, toAddresses: string, amount: any): Promise<string> {
+    const transaction = await aptos.transaction.build.simple({
+      sender: sender.accountAddress,
+      data: {
+        function: "0x1::aptos_account::transfer_coins",
+        typeArguments: [
+          contractAddress
+        ],
+        functionArguments: [
+          toAddresses,
+          amount
+        ],
+      },
+    });
+  
+    const senderAuthenticator = aptos.transaction.sign({ signer: sender, transaction });
+    const pendingTxn = await aptos.transaction.submit.simple({ transaction, senderAuthenticator });
+  
+    return pendingTxn.hash;
+  }
+
   return (
     <div className="flex flex-col h-screen bg-[#323030] text-white p-4">
-      {/* <div className="flex items-center mb-6 relative">
-      <button onClick={() => router.back()} className="text-white">
-        <ArrowLeft className="absolute left-0" />
-        </button>
-        <h1 className="text-xl font-bold flex-grow text-center">
-          Enter Amount
-        </h1>
-        <span className="absolute right-0 text-gray-400">Next</span>
-      </div> */}
+
        <div className="mb-6 flex items-center">
       <button onClick={() => router.back()} className="text-white">
           {/* Back Arrow Icon */}
@@ -61,18 +78,7 @@ export default function EnterAmount(): JSX.Element {
       </div>
       <div className="flex-grow flex flex-col items-center justify-center mb-6">
         <div className="text-6xl font-bold mb-2 relative items-center justify-center">
-          {/* <input
-            type="text"
-            value={amount}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              handleAmountChange(e.target.value)
-            }
-            placeholder="0"
-            className="bg-transparent text-center w-full outline-none"
-          />
-          <span className="absolute right-0 top-1/2 transform -translate-y-1/2 text-4xl">
-            APT
-          </span> */}
+
            <div className="text-6xl font-bold mb-2 relative flex items-center justify-center">
            <input
             type="text"
@@ -110,7 +116,14 @@ export default function EnterAmount(): JSX.Element {
         </div>
       </div>
       <div className="mt-auto px-4 mb-6">
-      <button className="w-full bg-[#F33439] text-white py-3 rounded-lg font-bold">
+      <button className="w-full bg-[#F33439] text-white py-3 rounded-lg font-bold"
+       onClick={() => {
+        transferLegacyCoin("0xbb629c088b696f8c3500d0133692a1ad98a90baef9d957056ec4067523181e9a","0x1::aptos_coin::AptosCoin", "0x413f9bd280f85fc556aac588a2dbe82d6bfede35c7e45118c2c16e3e4636b83b", "1000")
+          .then(hash => console.log("Transaction hash:", hash))
+          .catch(error => console.error("Transfer error:", error));
+      }}
+      
+      >
         Next
       </button>
         

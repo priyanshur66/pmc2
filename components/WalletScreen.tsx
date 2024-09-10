@@ -226,7 +226,7 @@ const WalletScreen = () => {
       const fetchData = async (msg: any) => {
         try {
           if (userData?.id) {
-            const querySnapshot = await getDocs(collection(db, "walletUsers"));
+            const querySnapshot = await getDocs(collection(db, "testWalletUsers"));
             const matchedData = querySnapshot.docs
               .map((doc) => ({
                 id: doc.id,
