@@ -1,22 +1,96 @@
 "use client";
-import React, { useState, ChangeEvent } from "react";
-import {
-  ArrowLeft,
-} from "react-feather";
+import React, { useState, ChangeEvent, useEffect } from "react";
+import { ArrowLeft } from "react-feather";
 import { useRouter } from 'next/navigation';
 import { aptos } from '@/components/WalletScreen';
+import { Ed25519PrivateKey, Account } from "@aptos-labs/ts-sdk";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+import db from "@/firebaseConfig";
 
+interface UserData {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  language_code: string;
+  is_premium?: boolean;
+}
 
-
+interface MyData {
+  id: string;
+  publicKey: string;
+  userName: number;
+  iv: string;
+  referralLink: string;
+  referredBy: string;
+  encryptedData: string;
+}
 
 export default function EnterAmount(): JSX.Element {
   const [amount, setAmount] = useState<string>("");
   const [amountUSD, setAmountUSD] = useState<number>(0);
   const availableAmount: number = 512.34;
   const router = useRouter();
-  const [transferFunction, setTransferFunction] = useState<((contractAddress: string, toAddress: string, amount: string) => Promise<string>) | null>(null);
+  const [transferFunction, setTransferFunction] = useState<((sender: string,contractAddress: string, toAddress: string, amount: string) => Promise<string>) | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [account, setAccount] = useState<Account | null>(null);
+  const [data, setData] = useState<MyData[]>([]);
 
+  const crypto = require('crypto');
+  const algorithm = 'aes-256-cbc';
+  const key = crypto.createHash('sha256').update('TEST_KEY').digest();
 
+  function decrypt(text: any) {
+    let iv = Buffer.from(text.iv, 'hex');
+    let encryptedText = Buffer.from(text.encryptedData, 'hex');
+    let decipher = crypto.createDecipheriv(algorithm, key, iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (userData?.id) {
+          const querySnapshot = await getDocs(collection(db, "testWalletUsers"));
+          const matchedData = querySnapshot.docs
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+            .filter((doc) => doc.id === String(userData.id)) as MyData[];
+
+          if (matchedData.length > 0) {
+            const accountData = matchedData[0];
+            const decryptedPrivateKey = decrypt({
+              iv: accountData.iv,
+              encryptedData: accountData.encryptedData,
+            });
+
+            const accountPrivateKey = new Ed25519PrivateKey(decryptedPrivateKey);
+            const accountArgs = {
+              privateKey: accountPrivateKey,
+              address: accountData.publicKey,
+            };
+            const userAccount = Account.fromPrivateKey(accountArgs);
+            setAccount(userAccount);
+
+            setTransferFunction(() => async (contractAddress: string, toAddress: string, amount: string) => {
+              if (!userAccount) throw new Error("User account not set");
+              return transferLegacyCoin(userAccount, contractAddress, toAddress, amount);
+            });
+
+            setData(matchedData);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [userData]);
 
   const handleAmountChange = (value: string): void => {
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
@@ -31,25 +105,32 @@ export default function EnterAmount(): JSX.Element {
     setAmountUSD(availableAmount);
   };
 
-  async function transferLegacyCoin(sender: any, contractAddress: string, toAddresses: string, amount: any): Promise<string> {
-    const transaction = await aptos.transaction.build.simple({
-      sender: sender.accountAddress,
-      data: {
-        function: "0x1::aptos_account::transfer_coins",
-        typeArguments: [
-          contractAddress
-        ],
-        functionArguments: [
-          toAddresses,
-          amount
-        ],
-      },
-    });
-  
-    const senderAuthenticator = aptos.transaction.sign({ signer: sender, transaction });
-    const pendingTxn = await aptos.transaction.submit.simple({ transaction, senderAuthenticator });
-  
-    return pendingTxn.hash;
+  async function transferLegacyCoin(sender: any, contractAddress: string, toAddresses: string, amount: string): Promise<string> {
+    try {
+      console.log("Transfer params:", { sender, contractAddress, toAddresses, amount });
+
+      const transaction = await aptos.transaction.build.simple({
+        sender: sender,
+        data: {
+          function: "0x1::aptos_account::transfer_coins",
+          typeArguments: [contractAddress],
+          functionArguments: [toAddresses, amount],
+        },
+      });
+
+      console.log("Transaction built:", transaction);
+
+      const senderAuthenticator = aptos.transaction.sign({ signer: sender, transaction });
+      console.log("Transaction signed");
+
+      const pendingTxn = await aptos.transaction.submit.simple({ transaction, senderAuthenticator });
+      console.log("Transaction submitted:", pendingTxn);
+
+      return pendingTxn.hash;
+    } catch (error) {
+      console.error("Error in transferLegacyCoin:", error);
+      throw error;
+    }
   }
 
   return (
@@ -117,12 +198,20 @@ export default function EnterAmount(): JSX.Element {
       </div>
       <div className="mt-auto px-4 mb-6">
       <button className="w-full bg-[#F33439] text-white py-3 rounded-lg font-bold"
-       onClick={() => {
-        transferLegacyCoin("0xbb629c088b696f8c3500d0133692a1ad98a90baef9d957056ec4067523181e9a","0x1::aptos_coin::AptosCoin", "0x413f9bd280f85fc556aac588a2dbe82d6bfede35c7e45118c2c16e3e4636b83b", "1000")
-          .then(hash => console.log("Transaction hash:", hash))
-          .catch(error => console.error("Transfer error:", error));
-      }}
-      
+        onClick={() => {
+          if (transferFunction) {
+            transferFunction(
+              "0xbb629c088b696f8c3500d0133692a1ad98a90baef9d957056ec4067523181e9a",
+              "0x1::aptos_coin::AptosCoin",
+              "0x413f9bd280f85fc556aac588a2dbe82d6bfede35c7e45118c2c16e3e4636b83b",
+              "1000"
+            )
+              .then(hash => console.log("Transaction hash:", hash))
+              .catch(error => console.error("Transfer error:", error));
+          } else {
+            console.error("Transfer function not set");
+          }
+        }}
       >
         Next
       </button>
