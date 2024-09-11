@@ -16,6 +16,7 @@
     "@moonpay/moonpay-react": "^1.8.0",
     "@next/font": "^14.2.5",
     "@twa-dev/sdk": "^7.8.0",
+    "aptos": "^1.21.0",
     "axios": "^1.7.7",
     "crypto": "^1.0.1",
     "crypto-js": "^4.2.0",
