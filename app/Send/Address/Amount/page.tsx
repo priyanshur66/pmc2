@@ -80,45 +80,6 @@ async function transferLegacyCoin(amount: number, privateKey: any, toAddress: st
   }
 }
 
-
-
-
-// Below function works like a charm
-
-// export async function transferLegacyCoin(amount: number, privateKey: string, toAddress: string): Promise<string> {
-//   try {
-//     const contractAddress: string = '0x1::aptos_coin::AptosCoin'; // Hardcoded contract address
-
-//     // Initialize the Aptos Account with the private key
-//     const sender: AptosAccount = new AptosAccount(HexString.ensure(privateKey).toUint8Array());
-
-//     // Build the transaction payload
-//     const payload: Types.TransactionPayload_EntryFunctionPayload = {
-//       type: 'entry_function_payload',
-//       function: '0x1::aptos_account::transfer_coins',
-//       type_arguments: [contractAddress],
-//       arguments: [toAddress, amount.toString()],
-//     };
-
-//     // Create a raw transaction
-//     const rawTxn = await aptosClient.generateTransaction(sender.address(), payload);
-
-//     // Sign the transaction
-//     const signedTxn = await aptosClient.signTransaction(sender, rawTxn);
-
-//     // Submit the transaction
-//     const pendingTxn = await aptosClient.submitTransaction(signedTxn);
-
-//     // Wait for the transaction to be confirmed
-//     await aptosClient.waitForTransaction(pendingTxn.hash);
-
-//     return pendingTxn.hash; // Return the transaction hash
-//   } catch (error) {
-//     console.error('Error transferring coins:', error);
-//     throw error;
-//   }
-// }
-
 export default function EnterAmount(): JSX.Element {
 
   const [amount, setAmount] = useState<string>("");
@@ -126,15 +87,17 @@ export default function EnterAmount(): JSX.Element {
   const availableAmount: number = 512.34;
   const router = useRouter();
 
-  const hardcodedAmount: number = 10000000; // Hardcoded transfer amount
+  const hardcodedAmount: number = 10000000;
   // const privateKey: string = '0x4c2282e2ff820ccb3ec2a3c5583d612d6d5a1556b38cce94068ff4dde74c1f5c'; // Hardcoded private key
   const toAddress: string = '0x0ee25eca6f5c8aee94b3198ee8663c3509cc0e9d5cff244f4990c86dfbd7569d'; // Hardcoded receiver address
 
   const handleAmountChange = (value: string): void => {
+    console.log("Handling amount change", value);  // Log before setting state
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
       setAmount(value);
       const numericValue: number = parseFloat(value) || 0;
-      setAmountUSD(numericValue * 1); // Assuming 1 APT = $1 USD for simplicity
+      setAmountUSD(numericValue * 1);
+      console.log("Entered amount:", value);  // Log after processing
     }
   };
 
@@ -152,12 +115,19 @@ export default function EnterAmount(): JSX.Element {
   //     console.error('Transaction failed:', error);
   //     // Optionally show an error message to the user
   //   }
-
-
+  // };
 
   const handleNextClick = async (): Promise<void> => {
     try {
-      const txnHash = await transferLegacyCoin(hardcodedAmount, privateKey, toAddress);
+      const numericAmount = parseFloat(amount);  // Convert amount from string to number
+      if (isNaN(numericAmount) || numericAmount <= 0) {
+        console.error('Invalid amount entered');
+        return;
+      }
+  
+      const adjustedAmount = Math.round(numericAmount * (10 ** 8));  // Multiply by 10^8
+  
+      const txnHash = await transferLegacyCoin(adjustedAmount, privateKey, toAddress);  // Pass adjustedAmount here
       console.log('Transaction successful with hash:', txnHash);
       // Optionally navigate to another page or show a success message
     } catch (error) {

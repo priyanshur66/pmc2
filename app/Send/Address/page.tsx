@@ -10,17 +10,9 @@ export default function SendAPT() {
 
   return (
     <div className="flex flex-col h-screen bg-[#323030] text-white p-4">
-      {/* <div className="flex items-center mb-6">
-      <button onClick={() => router.back()} className="text-white">
-
-        <ArrowLeft className="absolute left-4" />
-        </button>
-        <h1 className="text-xl font-bold  flex-grow text-center">Send APT</h1>
-        <span className="ml-auto text-gray-400">Next</span>
-      </div> */}
+    
       <div className="mb-6 flex items-center ">
       <button onClick={() => router.back()} className="text-white">
-          {/* Back Arrow Icon */}
           <ArrowLeft className="mr-4" />
 
         </button>
@@ -41,7 +33,6 @@ export default function SendAPT() {
             onChange={(e) => setAddress(e.target.value)}
             className="w-full bg-[#212020] border border-[#5E5E5E] rounded-2xl py-3 px-4 pr-10 text-white placeholder-white"
           />
-          {/* <Scan className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" /> */}
           <img src="/qr-scan.svg" alt="" className="absolute right-3 top-1/2 transform -translate-y-1/2 " />
         </div>
       </div>
@@ -50,7 +41,6 @@ export default function SendAPT() {
         <h2 className="text-sm text-white mb-2">Recently used</h2>
         <div className="flex items-center  rounded-lg p-3">
           <div className="bg-[#212020] rounded-full p-2 mr-3">
-            {/* <span className="text-xl">📦</span> */}
             <img src="/empty-wallet.svg" alt="" />
           </div>
           <div>
