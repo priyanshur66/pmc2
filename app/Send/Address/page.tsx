@@ -1,11 +1,23 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import { ArrowLeft} from 'react-feather';
 import { useRouter } from 'next/navigation';
 
 export default function SendAPT() {
   const [address, setAddress] = useState('');
   const router = useRouter();
+
+
+
+  const handleAddressChange = (value: string): void => {
+    console.log("Handling address change", value);
+      if (value === "" || (value)) {
+      setAddress(value);
+      console.log("Entered address:", value); 
+    }
+    
+    
+  };
 
 
   return (
@@ -30,8 +42,7 @@ export default function SendAPT() {
             type="text"
             placeholder="To: Name or address"
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="w-full bg-[#212020] border border-[#5E5E5E] rounded-2xl py-3 px-4 pr-10 text-white placeholder-white"
+            onChange={(e: ChangeEvent<HTMLInputElement>) => handleAddressChange(e.target.value)}            className="w-full bg-[#212020] border border-[#5E5E5E] rounded-2xl py-3 px-4 pr-10 text-white placeholder-white"
           />
           <img src="/qr-scan.svg" alt="" className="absolute right-3 top-1/2 transform -translate-y-1/2 " />
         </div>

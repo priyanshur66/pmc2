@@ -8,6 +8,7 @@ import axios from 'axios';
 import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
+import { strict } from 'assert';
 
 
 interface UserData {
@@ -24,6 +25,7 @@ interface TokenBalance {
   balance: number;
   contractAddress: string;
   standard: string;
+  symbol: string;
 }
 
 interface MyData {
@@ -135,20 +137,25 @@ const TokenCard: React.FC<TokenCardProps> = ({
           const tokenContractAddress = balance.metadata.asset_type;
           const tokenStandard = balance.token_standard;
           const formattedTokenBalance = tokenBalance / (10 ** tokenDecimals);
+          const tokenSymbol = balance.metadata.symbol;
     
           if (tokenStandard === 'v1' && !tokenName.includes('LP')) {
             tempArray.push({
               name: tokenName,
               balance: formattedTokenBalance,
               contractAddress: tokenContractAddress,
-              standard: tokenStandard
+              standard: tokenStandard,
+              symbol : tokenSymbol
+
             });
           } else if (tokenStandard === 'v2') {
             tempArray.push({
               name: tokenName,
               balance: formattedTokenBalance,
               contractAddress: tokenContractAddress,
-              standard: tokenStandard
+              standard: tokenStandard,
+              symbol : tokenSymbol
+
             });
           }
         }
@@ -184,15 +191,11 @@ const TokenCard: React.FC<TokenCardProps> = ({
 
           <div key={index}>
             <h2 className="text-lg font-bold">
-            {token.name.charAt(0)}
+            {token.name}
             </h2>
             <p className="text-sm text-white">
-            {token.balance.toFixed(2)}{" "}
-              {/* <span
-                className={changePositive ? "text-green-500" : "text-red-500"}
-              >
-                {change}
-              </span> */}
+            {token.balance.toFixed(2)}{" "}{token.symbol}
+
             </p>
           </div>
                       ))}
@@ -254,23 +257,7 @@ const Send = () => {
 
         />
 
-        {/* <TokenCard
-          name="APT"
-          symbol="0"
-          price="521.90 APT"
-          change=""
-          iconSrc="aptos.svg"
-          changePositive={true}
-        />
-
-        <TokenCard
-          name="APT"
-          symbol="0"
-          price="521.90 APT"
-          change=""
-          iconSrc="aptos.svg"
-          changePositive={true}
-        /> */}
+  
     </div>
   );
 };
