@@ -145,6 +145,7 @@ const WalletScreen = () => {
   const [address, setAddress] = useState("")
   const [isBalanceVisible, setIsBalanceVisible] = useState(true); // State to control balance visibility
   const spanRef = useRef<HTMLSpanElement | null>(null);
+  const { publicKey, setPublicKey } = usePublicKey();
 
 
 
@@ -221,7 +222,8 @@ const WalletScreen = () => {
     console.log("data is", data);
     if (data.length > 0) {
       fetchTokenBalances(data[0].publicKey);
-      usePublicKey.setState({ publicKey: data[0].publicKey });
+      // usePublicKey.setState({ publicKey: data[0].publicKey });
+      setPublicKey(data[0].publicKey)
       const res = usePublicKey.getState().publicKey;
       setAddress(res);
       console.log(address);

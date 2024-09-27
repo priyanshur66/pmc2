@@ -6,8 +6,11 @@ import MyQRCode from '@/components/MyQRCode';
 import { usePublicKey } from '@/store';
 
 const AptosReceive = () => {
+  const { publicKey, setPublicKey } = usePublicKey();
+
     const router = useRouter();
-    const walletAddress = usePublicKey.getState().publicKey
+    const walletAddress = publicKey
+
   // const walletAddress = '0xbb629c088b696f8c3500d0133692a1ad98a90baef9d957056ec4067523181e9a';
 
   return (
