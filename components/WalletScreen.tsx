@@ -12,6 +12,10 @@ import { getDoc, setDoc } from "firebase/firestore";
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
 import axios from 'axios';
+import { Clipboard } from 'lucide-react';
+import { useRef } from "react";
+
+import { usePublicKey } from "@/store";
 
 import {
   Account,
@@ -138,7 +142,10 @@ const WalletScreen = () => {
   const [userData, setUserData] = useState<UserData | null>(null)
   const [data, setData] = useState<MyData[]>([]);
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
+  const [address, setAddress] = useState("")
   const [isBalanceVisible, setIsBalanceVisible] = useState(true); // State to control balance visibility
+  const spanRef = useRef<HTMLSpanElement | null>(null);
+
 
 
 
@@ -205,9 +212,19 @@ const WalletScreen = () => {
   };
 
 
+  // useEffect(() => {
+  //   if (data.length > 0) {
+  //     fetchTokenBalances(data[0].publicKey);
+  //   }
+  // }, [data, fetchTokenBalances]);
   useEffect(() => {
+    console.log("data is", data);
     if (data.length > 0) {
       fetchTokenBalances(data[0].publicKey);
+      usePublicKey.setState({ publicKey: data[0].publicKey });
+      const res = usePublicKey.getState().publicKey;
+      setAddress(res);
+      console.log(address);
     }
   }, [data, fetchTokenBalances]);
 
@@ -258,7 +275,22 @@ const WalletScreen = () => {
       setIsBalanceVisible(!isBalanceVisible); // Toggle balance visibility
     };
 
-
+  
+    
+    const handleCopy = () => {
+      if (spanRef.current) {
+        const textToCopy = spanRef.current.textContent;
+        if (textToCopy) {
+          navigator.clipboard.writeText(textToCopy)
+            .then(() => {
+              alert('Copied to clipboard!');
+            })
+            .catch((err) => {
+              console.error('Failed to copy: ', err);
+            });
+        }
+      }
+    };
   
   return (
     <div>
@@ -279,19 +311,22 @@ const WalletScreen = () => {
                 <div className="flex ml-2">
                         {data.length > 0 ? (
     <span
+      ref={spanRef}
       key={data[0].id}
       className="text-s text-white font-extralight mt-1"
     >
       {data[0].publicKey.slice(0, 6)}...{data[0].publicKey.slice(-4)}
     </span>
   ) : (
-    <span className="text-s text-white font-extralight mt-1">
+    <span 
+    ref={spanRef}
+    className="text-s text-white font-extralight mt-1">
       Loading...
     </span>
   )}
 
+                  <img onClick={handleCopy} src="/copy.svg" alt="" className="ml-2" />
 
-                  <img src="/copy.svg" alt="" className="ml-2" />
                 </div>
               </div>
             </div>

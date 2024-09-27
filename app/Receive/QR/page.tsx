@@ -2,10 +2,13 @@
 import React from 'react';
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "react-feather";
+import MyQRCode from '@/components/MyQRCode';
+import { usePublicKey } from '@/store';
 
 const AptosReceive = () => {
     const router = useRouter();
-  const walletAddress = '0x4184CED912A14E6AD2A44F4Cb3026aC866';
+    const walletAddress = usePublicKey.getState().publicKey
+  // const walletAddress = '0xbb629c088b696f8c3500d0133692a1ad98a90baef9d957056ec4067523181e9a';
 
   return (
     <div className="bg-[#323030] min-h-screen text-white p-4">
@@ -35,7 +38,9 @@ const AptosReceive = () => {
       <div className="flex justify-center mb-6">
         <div className="w-48 h-48 mt-6 bg-white p-2 rounded-xl">
           {/* Replace with actual QR code component */}
-          <div className="w-full h-full bg-[url('../public/qr.svg')] flex items-center justify-center">
+          <div className="w-full h-full flex items-center justify-center">
+          <MyQRCode/>
+
             <span className="text-white"></span>
           </div>
         </div>
