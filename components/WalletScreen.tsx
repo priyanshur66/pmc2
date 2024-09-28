@@ -14,22 +14,17 @@ import WebApp from "@twa-dev/sdk";
 import axios from 'axios';
 import { Clipboard } from 'lucide-react';
 import { useRef } from "react";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { usePublicKey } from "@/store";
 
 import {
-  Account,
-  AccountAddress,
-  AnyNumber,
+  
   Aptos,
   AptosConfig,
-  InputViewFunctionData,
   Network,
-  NetworkToNetworkName,
-  CreateEd25519AccountFromPrivateKeyArgs,
-  Ed25519PrivateKey,
-  Ed25519Account,
-  U8,
+ 
 } from "@aptos-labs/ts-sdk";
 import crypto from 'crypto';
 
@@ -228,7 +223,7 @@ const WalletScreen = () => {
       setAddress(res);
       console.log(address);
     }
-  }, [data, fetchTokenBalances]);
+  }, [data]);
 
   useEffect(() =>{
     if (typeof window !== 'undefined') {
@@ -279,20 +274,54 @@ const WalletScreen = () => {
 
   
     
+    // const handleCopy = () => {
+    //   if (spanRef.current) {
+    //     const textToCopy = spanRef.current.textContent;
+    //     if (textToCopy) {
+    //       navigator.clipboard.writeText(textToCopy)
+    //         .then(() => {
+    //           alert('Copied to clipboard!');
+    //         })
+    //         .catch((err) => {
+    //           console.error('Failed to copy: ', err);
+    //         });
+    //     }
+    //   }
+    // };
     const handleCopy = () => {
       if (spanRef.current) {
         const textToCopy = spanRef.current.textContent;
         if (textToCopy) {
           navigator.clipboard.writeText(textToCopy)
             .then(() => {
-              alert('Copied to clipboard!');
+              toast.success('Copied to clipboard!', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+              });
             })
             .catch((err) => {
+              toast.error('Failed to copy!', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+              });
               console.error('Failed to copy: ', err);
             });
         }
       }
     };
+    
   
   return (
     <div>
@@ -330,6 +359,8 @@ const WalletScreen = () => {
                   <img onClick={handleCopy} src="/copy.svg" alt="" className="ml-2" />
 
                 </div>
+                <ToastContainer />
+
               </div>
             </div>
             <div className="flex items-center space-x-4">

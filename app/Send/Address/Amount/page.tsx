@@ -85,6 +85,8 @@ export default function EnterAmount(): JSX.Element {
   const [amount, setAmount] = useState<string>("");
   const [amountUSD, setAmountUSD] = useState<number>(0);
   const availableAmount: number = 512.34;
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const router = useRouter();
 
   const hardcodedAmount: number = 10000000;
@@ -106,18 +108,11 @@ export default function EnterAmount(): JSX.Element {
     setAmountUSD(availableAmount);
   };
 
-  // const handleNextClick = async (): Promise<void> => {
-  //   try {
-  //     const txnHash = await transferLegacyCoin(hardcodedAmount, privateKey, toAddress);
-  //     console.log('Transaction successful with hash:', txnHash);
-  //     // Optionally navigate to another page or show a success message
-  //   } catch (error) {
-  //     console.error('Transaction failed:', error);
-  //     // Optionally show an error message to the user
-  //   }
-  // };
+ 
 
   const handleNextClick = async (): Promise<void> => {
+    setIsLoading(true);
+
     try {
       const numericAmount = parseFloat(amount);  // Convert amount from string to number
       if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -129,12 +124,21 @@ export default function EnterAmount(): JSX.Element {
   
       const txnHash = await transferLegacyCoin(adjustedAmount, privateKey, toAddress);  // Pass adjustedAmount here
       console.log('Transaction successful with hash:', txnHash);
+
+      router.push('/Send/Address/Amount/Success');
+
+
       // Optionally navigate to another page or show a success message
     } catch (error) {
       console.error('Transaction failed:', error);
       // Optionally show an error message to the user
     }
+    finally {
+      setIsLoading(false);
+    }
   };
+ 
+
 
   
   return (
@@ -189,13 +193,21 @@ export default function EnterAmount(): JSX.Element {
         </div>
       </div>
       <div className="mt-auto px-4 mb-6">
-        <button
+        {/* <button
           className="w-full bg-[#F33439] text-white py-3 rounded-lg font-bold"
           onClick={handleNextClick}
         >
           Next
+        </button> */}
+         <button
+          className={`w-full bg-[#F33439] text-white py-3 rounded-lg font-bold ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          onClick={handleNextClick}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Processing...' : 'Next'}
         </button>
       </div>
     </div>
   );
 }
+
