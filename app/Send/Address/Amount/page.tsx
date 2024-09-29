@@ -6,6 +6,7 @@ import { AptosAccount, Types, HexString, AptosClient } from 'aptos';
 import { useToKey } from "@/store";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import db from "@/firebaseConfig";
+import { useEffect } from "react";
 import WebApp from "@twa-dev/sdk";
 
 const NODE_URL = 'https://fullnode.devnet.aptoslabs.com/v1'; // Testnet URL
@@ -59,16 +60,18 @@ const key = crypto.createHash('sha256').update('KEY_TEST').digest();
 
 // Example encrypted data and IV (these should be provided or obtained from your encryption process)
 const encryptedData = '7841fb1d48c2852cc45ca45b91f8fa5f70935583cbc8b1776e86629c65d8c9602da8b279ca69acc1ec68e11c7bc31a227220825e1d542b5f202f0e3441f147cfa468aa40d2ba458d4e96de80620da2dd'; // The encrypted private key in hex format
-const iv = '8513d51cf35b2fe680947148ddd76ab2'; // The initialization vector in hex format
+// const iv = '8513d51cf35b2fe680947148ddd76ab2';
+ // The initialization vector in hex format
 
-const decryptedPrivateKey = decryptPrivateKey(encryptedData, iv, key);
-console.log('Decrypted Private Key:', decryptedPrivateKey);
+// const decryptedPrivateKey = decryptPrivateKey(encryptedData, iv, key);
+// console.log('Decrypted Private Key:', decryptedPrivateKey);
 
 
 
 // Hardcoded account address
 const accountAddress = '0xbb629c088b696f8c3500d0133692a1ad98a90baef9d957056ec4067523181e9a'; // Hardcoded account address
-const privateKey = HexString.ensure(decryptedPrivateKey).toUint8Array(); // Convert to Uint8Array
+// const privateKey = HexString.ensure(decryptedPrivateKey).toUint8Array(); 
+// Convert to Uint8Array
 
 async function transferLegacyCoin(amount: number, privateKey: any, toAddress: string) {
   try {
@@ -110,10 +113,56 @@ export default function EnterAmount(): JSX.Element {
   const [amountUSD, setAmountUSD] = useState<number>(0);
   const availableAmount: number = 512.34;
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [data, setData] = useState<MyData[]>([]);
+  const [privateKey, setPrivateKey] = useState<Uint8Array | null>(null);
 
   const router = useRouter();
   const { toKey } = useToKey();
   const toAddress = toKey;
+
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && WebApp.initDataUnsafe.user) {
+      setUserData(WebApp.initDataUnsafe.user as UserData);
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (userData?.id) {
+          const querySnapshot = await getDocs(collection(db, "testWalletUsers"));
+          const matchedData = querySnapshot.docs
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+            .filter((doc) => doc.id === String(userData.id)) as MyData[];
+          
+          setData(matchedData);
+
+          if (matchedData.length > 0) {
+            const { iv, encryptedData } = matchedData[0];
+            
+            // Generate the key
+            const key = crypto.createHash('sha256').update('KEY_TEST').digest();
+
+            // Decrypt the private key
+            const decryptedPrivateKey = decryptPrivateKey(encryptedData, iv, key);
+            console.log('Decrypted Private Key:', decryptedPrivateKey);
+
+            // Convert the decrypted private key to Uint8Array and store it
+            setPrivateKey(HexString.ensure(decryptedPrivateKey).toUint8Array());
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      }
+    };
+
+    fetchData();
+  }, [userData]);
 
 
   const hardcodedAmount: number = 10000000;
