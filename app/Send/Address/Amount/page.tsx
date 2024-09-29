@@ -32,13 +32,22 @@ interface MyData {
 }
 function decryptPrivateKey(encryptedData: string, iv: string, key: Buffer): string {
   try {
-    const algorithm = 'aes-256-cbc';
+    const algorithm = 'aes-256-cbc'; // Encryption algorithm
+
+    // Convert IV and encrypted data from hex to Buffer
     const ivBuffer = Buffer.from(iv, 'hex');
     const encryptedTextBuffer = Buffer.from(encryptedData, 'hex');
+  
+    // Create a decipher instance
     const decipher = crypto.createDecipheriv(algorithm, key, ivBuffer);
+  
+    // Decrypt the data
     let decrypted = decipher.update(encryptedTextBuffer);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
-    return decrypted.toString('utf8'); // Specify UTF-8 encoding
+  
+    // Return the decrypted data as a string
+    return decrypted.toString(); 
+    // Specify UTF-8 encoding
   } 
   catch (error) {
     if (error instanceof Error) {
@@ -52,9 +61,9 @@ function decryptPrivateKey(encryptedData: string, iv: string, key: Buffer): stri
 
 const key = crypto.createHash('sha256').update('KEY_TEST').digest();
 
-const accountAddress = '0xbb629c088b696f8c3500d0133692a1ad98a90baef9d957056ec4067523181e9a';
 
-async function transferLegacyCoin(amount: number, privateKey: Uint8Array, toAddress: string) {
+
+async function transferLegacyCoin(amount: number, privateKey: any, toAddress: string) {
   try {
     const contractAddress = '0x1::aptos_coin::AptosCoin';
     const sender = new AptosAccount(privateKey);
