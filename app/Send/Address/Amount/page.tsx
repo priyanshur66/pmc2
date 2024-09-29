@@ -83,6 +83,8 @@ export default function EnterAmount(): JSX.Element {
   const [amountUSD, setAmountUSD] = useState<number>(0);
   const availableAmount: number = 512.34;
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
 
   const { encryptedValue } = useEncryptedValue();
   const { ivData } = useIvData();
@@ -120,6 +122,8 @@ const privateKey = HexString.ensure(decryptedPrivateKey).toUint8Array();
 
 
   const handleNextClick = async (): Promise<void> => {
+    setIsLoading(true);
+
     try {
       const numericAmount = parseFloat(amount);  // Convert amount from string to number
       if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -131,10 +135,14 @@ const privateKey = HexString.ensure(decryptedPrivateKey).toUint8Array();
   
       const txnHash = await transferLegacyCoin(adjustedAmount, privateKey, toAddress);  // Pass adjustedAmount here
       console.log('Transaction successful with hash:', txnHash);
-      // Optionally navigate to another page or show a success message
+      router.push('/Send/Address/Amount/Success');
+      
     } catch (error) {
       console.error('Transaction failed:', error);
       // Optionally show an error message to the user
+    }
+    finally {
+      setIsLoading(false);
     }
   };
 
@@ -193,11 +201,12 @@ const privateKey = HexString.ensure(decryptedPrivateKey).toUint8Array();
         </div>
       </div>
       <div className="mt-auto px-4 mb-6">
-        <button
-          className="w-full bg-[#F33439] text-white py-3 rounded-lg font-bold"
+      <button
+          className={`w-full bg-[#F33439] text-white py-3 rounded-lg font-bold ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={handleNextClick}
+          disabled={isLoading}
         >
-          Next
+          {isLoading ? 'Processing...' : 'Next'}
         </button>
       </div>
     </div>
