@@ -15,13 +15,13 @@ const crypto = require('crypto');
 
 
 
-
-// Decrypt private key function
-
-
 function decryptPrivateKey(encryptedData: string, iv: string, key: Buffer): string {
   const algorithm = 'aes-256-cbc'; // Encryption algorithm
 
+  if (!iv) {
+    console.error('IV is missing, cannot decrypt private key.');
+    return ''; // Return an empty string if IV is invalid
+  }
   // Convert IV and encrypted data from hex to Buffer
   const ivBuffer = Buffer.from(iv, 'hex');
   const encryptedTextBuffer = Buffer.from(encryptedData, 'hex');
@@ -40,25 +40,9 @@ function decryptPrivateKey(encryptedData: string, iv: string, key: Buffer): stri
 // Generate the key from 'TEST_KEY'
 const key = crypto.createHash('sha256').update('KEY_TEST').digest();
 
-// Example encrypted data and IV (these should be provided or obtained from your encryption process)
-const {encryptedValue} = useEncryptedValue()
+ 
 
-const encryptedData = encryptedValue;
-
-const {ivData} = useIvData()
-// The encrypted private key in hex format
-const iv = ivData; // The initialization vector in hex format
-
-
-const decryptedPrivateKey = decryptPrivateKey(encryptedData, iv, key);
-console.log('Decrypted Private Key:', decryptedPrivateKey);
-
-
-
-// Hardcoded account address
-const accountAddress = '0xbb629c088b696f8c3500d0133692a1ad98a90baef9d957056ec4067523181e9a'; // Hardcoded account address
-const privateKey = HexString.ensure(decryptedPrivateKey).toUint8Array(); // Convert to Uint8Array
-
+// Convert to Uint8Array
 async function transferLegacyCoin(amount: number, privateKey: any, toAddress: string) {
   try {
     const contractAddress = '0x1::aptos_coin::AptosCoin'; // Hardcoded contract address
@@ -100,12 +84,20 @@ export default function EnterAmount(): JSX.Element {
   const availableAmount: number = 512.34;
   const router = useRouter();
 
-  const hardcodedAmount: number = 10000000;
-  // const privateKey: string = '0x4c2282e2ff820ccb3ec2a3c5583d612d6d5a1556b38cce94068ff4dde74c1f5c'; // Hardcoded private key
-  // const toAddress: string = '0x0ee25eca6f5c8aee94b3198ee8663c3509cc0e9d5cff244f4990c86dfbd7569d';
+  const { encryptedValue } = useEncryptedValue();
+  const { ivData } = useIvData();
+const encryptedData = encryptedValue;
+const iv = ivData || ''; // Fallback to empty string if ivData is undefined
+
+const decryptedPrivateKey = iv ? decryptPrivateKey(encryptedData, iv, key) : '';
+if (!decryptedPrivateKey) {
+  console.error('Private key decryption failed due to missing or invalid IV.');
+}
+
+console.log('Decrypted Private Key:', decryptedPrivateKey);
+
+const privateKey = HexString.ensure(decryptedPrivateKey).toUint8Array(); 
   const {toKey} = useToKey();
-
-
   const toAddress = toKey;
 
    // Hardcoded receiver address
@@ -125,16 +117,7 @@ export default function EnterAmount(): JSX.Element {
     setAmountUSD(availableAmount);
   };
 
-  // const handleNextClick = async (): Promise<void> => {
-  //   try {
-  //     const txnHash = await transferLegacyCoin(hardcodedAmount, privateKey, toAddress);
-  //     console.log('Transaction successful with hash:', txnHash);
-  //     // Optionally navigate to another page or show a success message
-  //   } catch (error) {
-  //     console.error('Transaction failed:', error);
-  //     // Optionally show an error message to the user
-  //   }
-  // };
+
 
   const handleNextClick = async (): Promise<void> => {
     try {
