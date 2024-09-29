@@ -4,24 +4,15 @@ import { ArrowRight, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useEffect } from 'react';
-interface TransactionDetailsProps {
-  amount: string;
-  date: string;
-  status: string;
-  recipient: string;
-  network: string;
-  networkFee: string;
-}
+import { useToKey } from '@/store';
 
-const TransactionSuccess: React.FC<TransactionDetailsProps> = ({
-  amount,
-  date,
-  status,
-  recipient,
-  network,
-  networkFee,
+
+const TransactionSuccess: React.FC = ({
+  
 }) => {
     const router = useRouter();
+    const {toKey} = useToKey();
+    const toAddress = toKey;
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [selectedDate, setSelectedDate] = useState<string>('');
 
@@ -60,7 +51,7 @@ const TransactionSuccess: React.FC<TransactionDetailsProps> = ({
         </div>
       </div>
       
-      <div className="text-center text-3xl font-bold mb-6">{amount} APT</div>
+      <div className="text-center text-3xl font-bold mb-6"> APT</div>
       
       <div className="space-y-3 mb-6 bg-[#1414144F] rounded-2xl m-4 p-4">
         <div className="flex justify-between">
@@ -73,7 +64,7 @@ const TransactionSuccess: React.FC<TransactionDetailsProps> = ({
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">To</span>
-          <span>{recipient}</span>
+          <span>{toAddress}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">Network</span>
@@ -81,7 +72,7 @@ const TransactionSuccess: React.FC<TransactionDetailsProps> = ({
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">Network fee</span>
-          <span>{networkFee} APT</span>
+          <span> APT</span>
         </div>
       </div>
       
