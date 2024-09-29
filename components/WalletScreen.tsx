@@ -18,6 +18,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { usePublicKey } from "@/store";
+import { useIvData } from "@/store";
+import { useEncryptedValue } from "@/store";
 
 import {
   
@@ -141,6 +143,10 @@ const WalletScreen = () => {
   const [isBalanceVisible, setIsBalanceVisible] = useState(true); // State to control balance visibility
   const spanRef = useRef<HTMLSpanElement | null>(null);
   const { publicKey, setPublicKey } = usePublicKey();
+  const { ivData, setIvData } = useIvData();
+  const { encryptedValue, setEncryptedValue } = useEncryptedValue();
+
+
 
 
 
@@ -217,8 +223,11 @@ const WalletScreen = () => {
     console.log("data is", data);
     if (data.length > 0) {
       fetchTokenBalances(data[0].publicKey);
+      
       // usePublicKey.setState({ publicKey: data[0].publicKey });
       setPublicKey(data[0].publicKey)
+      setIvData(data[0].iv)
+      setEncryptedValue(data[0].encryptedData)
       const res = usePublicKey.getState().publicKey;
       setAddress(res);
       console.log(address);
