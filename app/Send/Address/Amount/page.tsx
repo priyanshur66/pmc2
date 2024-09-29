@@ -30,15 +30,24 @@ interface MyData {
   referredBy: string;
   encryptedData: string;
 }
-
 function decryptPrivateKey(encryptedData: string, iv: string, key: Buffer): string {
-  const algorithm = 'aes-256-cbc';
-  const ivBuffer = Buffer.from(iv, 'hex');
-  const encryptedTextBuffer = Buffer.from(encryptedData, 'hex');
-  const decipher = crypto.createDecipheriv(algorithm, key, ivBuffer);
-  let decrypted = decipher.update(encryptedTextBuffer);
-  decrypted = Buffer.concat([decrypted, decipher.final()]);
-  return decrypted.toString();
+  try {
+    const algorithm = 'aes-256-cbc';
+    const ivBuffer = Buffer.from(iv, 'hex');
+    const encryptedTextBuffer = Buffer.from(encryptedData, 'hex');
+    const decipher = crypto.createDecipheriv(algorithm, key, ivBuffer);
+    let decrypted = decipher.update(encryptedTextBuffer);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString('utf8'); // Specify UTF-8 encoding
+  } 
+  catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Decryption failed: ${error.message}`);
+    } else {
+      throw new Error('Decryption failed: Unknown error');
+    }
+  }
+  
 }
 
 const key = crypto.createHash('sha256').update('KEY_TEST').digest();
@@ -107,7 +116,7 @@ export default function EnterAmount(): JSX.Element {
           
           setData(matchedData);
           addDebugInfo(`Matched data: ${JSON.stringify(matchedData)}`);
-
+  
           if (matchedData.length > 0) {
             const { iv, encryptedData } = matchedData[0];
             
@@ -115,24 +124,33 @@ export default function EnterAmount(): JSX.Element {
               addDebugInfo('IV or encryptedData is missing');
               return;
             }
-
+  
             addDebugInfo(`IV: ${iv}`);
             addDebugInfo(`Encrypted Data: ${encryptedData}`);
-
-            const decryptedPrivateKey = decryptPrivateKey(encryptedData, iv, key);
-            addDebugInfo(`Decrypted Private Key: ${decryptedPrivateKey}`);
-
-            setPrivateKey(HexString.ensure(decryptedPrivateKey).toUint8Array());
-            addDebugInfo('Private key set successfully');
+  
+            try {
+              const key = crypto.createHash('sha256').update('KEY_TEST').digest();
+              addDebugInfo(`Key used for decryption: ${key.toString('hex')}`);
+              
+              const decryptedPrivateKey = decryptPrivateKey(encryptedData, iv, key);
+              addDebugInfo(`Decrypted Private Key: ${decryptedPrivateKey}`);
+  
+              setPrivateKey(HexString.ensure(decryptedPrivateKey).toUint8Array());
+              addDebugInfo('Private key set successfully');
+            } catch (decryptError) {
+              if (decryptError instanceof Error) {
+                addDebugInfo(`Decryption error: ${decryptError.message}`);
+              }            }
           } else {
             addDebugInfo('No matching data found for user');
           }
         }
       } catch (error) {
-        addDebugInfo(`Error fetching data: ${error}`);
-      }
+        if (error instanceof Error) {
+          addDebugInfo(`Error fetching data: ${error.message}`);
+        }       }
     };
-
+  
     fetchData();
   }, [userData]);
 
@@ -155,32 +173,37 @@ export default function EnterAmount(): JSX.Element {
   const handleNextClick = async (): Promise<void> => {
     setIsLoading(true);
     addDebugInfo('Transaction process started');
-
+  
     try {
       const numericAmount = parseFloat(amount);
       if (isNaN(numericAmount) || numericAmount <= 0) {
         addDebugInfo('Invalid amount entered');
         return;
       }
-
+  
       if (!privateKey) {
         addDebugInfo('Private key not available');
         return;
       }
-
+  
       const adjustedAmount = Math.round(numericAmount * (10 ** 8));
-
+  
       addDebugInfo(`Initiating transfer: Amount: ${adjustedAmount}, To: ${toAddress}`);
       const txnHash = await transferLegacyCoin(adjustedAmount, privateKey, toAddress);
       addDebugInfo(`Transaction successful with hash: ${txnHash}`);
-
+  
       router.push('/Send/Address/Amount/Success');
     } catch (error) {
-      addDebugInfo(`Transaction failed: ${error}`);
+      if (error instanceof Error) {
+        addDebugInfo(`Transaction failed: ${error.message}`);
+      } else {
+        addDebugInfo('Transaction failed: Unknown error');
+      }
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <div className="flex flex-col h-screen bg-[#323030] text-white p-4">
