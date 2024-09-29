@@ -3,13 +3,37 @@ import React, { useState, ChangeEvent } from "react";
 import { ArrowLeft } from "react-feather";
 import { useRouter } from 'next/navigation';
 import { AptosAccount, Types, HexString, AptosClient } from 'aptos';
-
+import { useToKey } from "@/store";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+import db from "@/firebaseConfig";
+import WebApp from "@twa-dev/sdk";
 
 const NODE_URL = 'https://fullnode.devnet.aptoslabs.com/v1'; // Testnet URL
 const aptosClient = new AptosClient(NODE_URL);
 const crypto = require('crypto');
 
+
+
+interface UserData {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  language_code: string;
+  is_premium?: boolean;
+}
+
+interface MyData {
+  id: string;
+  publicKey: string;
+  userName: number;
+  iv: string;
+  referralLink: string;
+  referredBy: string;
+  encryptedData: string;
+}
 // Decrypt private key function
+
 
 
 function decryptPrivateKey(encryptedData: string, iv: string, key: Buffer): string {
@@ -88,10 +112,15 @@ export default function EnterAmount(): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const router = useRouter();
+  const { toKey } = useToKey();
+  const toAddress = toKey;
+
 
   const hardcodedAmount: number = 10000000;
   // const privateKey: string = '0x4c2282e2ff820ccb3ec2a3c5583d612d6d5a1556b38cce94068ff4dde74c1f5c'; // Hardcoded private key
-  const toAddress: string = '0x0ee25eca6f5c8aee94b3198ee8663c3509cc0e9d5cff244f4990c86dfbd7569d'; // Hardcoded receiver address
+  // const toAddress: string = '0x0ee25eca6f5c8aee94b3198ee8663c3509cc0e9d5cff244f4990c86dfbd7569d'; 
+  // Hardcoded receiver address
+
 
   const handleAmountChange = (value: string): void => {
     console.log("Handling amount change", value);  // Log before setting state

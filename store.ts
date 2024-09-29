@@ -4,6 +4,11 @@ interface PublicKeyState {
   publicKey: string;
   setPublicKey: (key: string) => void;
 }
+interface toKeyState {
+  toKey: string;
+  setToKey: (key: string) => void;
+}
+
 
 export const usePublicKey = create<PublicKeyState>()(
   persist(
@@ -16,4 +21,19 @@ export const usePublicKey = create<PublicKeyState>()(
       storage: createJSONStorage(() => localStorage),
     }
   )
+
+);
+
+export const useToKey = create<toKeyState>()(
+  persist(
+    (set) => ({
+      toKey: '',
+      setToKey: (key) => set({ toKey: key }),
+    }),
+    {
+      name: 'public-key-storage',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+  
 );

@@ -2,10 +2,13 @@
 import React, { useState, ChangeEvent } from 'react';
 import { ArrowLeft} from 'react-feather';
 import { useRouter } from 'next/navigation';
+import { useToKey } from '@/store';
 
 export default function SendAPT() {
   const [address, setAddress] = useState('');
   const router = useRouter();
+  const { toKey, setToKey } = useToKey();
+
 
 
 
@@ -13,6 +16,7 @@ export default function SendAPT() {
     console.log("Handling address change", value);
       if (value === "" || (value)) {
       setAddress(value);
+      setToKey(value);
       console.log("Entered address:", value); 
     }
     
