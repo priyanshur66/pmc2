@@ -84,12 +84,12 @@ export default function EnterAmount(): JSX.Element {
     setDebugInfo((prev) => [...prev, info]);
   };
 
-  useEffect(() => {
-    const decryptedPrivateKey = decryptPrivateKey(encryptedData, iv, key);
-    const res = HexString.ensure(decryptedPrivateKey).toUint8Array();
-    setPrivateKey(res)
-    addDebugInfo(`privatekey : ${res}`);
-  }, []);
+  // useEffect(() => {
+  //   const decryptedPrivateKey = decryptPrivateKey(encryptedData, iv, key);
+  //   const res = HexString.ensure(decryptedPrivateKey).toUint8Array();
+  //   setPrivateKey(res)
+  //   addDebugInfo(`privatekey : ${res}`);
+  // }, []);
 
   const handleAmountChange = (value: string): void => {
     addDebugInfo(`Handling amount change: ${value}`);
@@ -156,7 +156,7 @@ export default function EnterAmount(): JSX.Element {
           className={`w-full bg-[#F33439] text-white py-3 rounded-lg font-bold ${
             isLoading ? "opacity-50 cursor-not-allowed" : ""
           }`}
-          onClick={handleNextClick}
+          // onClick={handleNextClick}
           disabled={isLoading}
         >
           {isLoading ? "Processing..." : "Next"}
