@@ -156,6 +156,8 @@ const WalletScreen = () => {
   const [userData, setUserData] = useState<UserData | null>(null)
   const [data, setData] = useState<MyData[]>([]);
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
+  const [totalBalance, setTotalBalance] = useState<number>(0);
+
   const [address, setAddress] = useState("")
   const [isBalanceVisible, setIsBalanceVisible] = useState(true); // State to control balance visibility
   const spanRef = useRef<HTMLSpanElement | null>(null);
@@ -164,6 +166,73 @@ const WalletScreen = () => {
   const { encryptedValue, setEncryptedValue } = useEncryptedValue();
   // ... (keep all your existing state variables)
   const [isLoading, setIsLoading] = useState(false);
+
+  const fetchTokenBalances = async (publicKey: string) => {
+    const TokensCollectionurl = 'https://api.devnet.aptoslabs.com/v1/graphql';
+    const query = `
+      query MyQuery {
+        current_fungible_asset_balances(
+          where: {owner_address: {_eq: "${publicKey}"}, amount: {_gt: "0"}}
+        ) {
+          owner_address
+          amount
+          metadata {
+            asset_type
+            name
+            supply_v2
+            symbol
+            token_standard
+            decimals
+          }
+          token_standard
+        }
+      }
+    `;
+
+    try {
+      const response = await axios.post(TokensCollectionurl, { query });
+      const balances = response.data.data.current_fungible_asset_balances;
+  
+      const tempArray: TokenBalance[] = [];
+      let totalBalance = 0;
+
+  
+      for (const balance of balances) {
+        const tokenDecimals = balance.metadata.decimals;
+        const tokenBalance = balance.amount;
+        const tokenName = balance.metadata.name;
+        const tokenContractAddress = balance.metadata.asset_type;
+        const tokenStandard = balance.token_standard;
+        const formattedTokenBalance = tokenBalance / (10 ** tokenDecimals);
+  
+        if (tokenStandard === 'v1' && !tokenName.includes('LP')) {
+          tempArray.push({
+            name: tokenName,
+            balance: formattedTokenBalance,
+            contractAddress: tokenContractAddress,
+            standard: tokenStandard
+          });
+          totalBalance += formattedTokenBalance;
+
+        } else if (tokenStandard === 'v2') {
+          tempArray.push({
+            name: tokenName,
+            balance: formattedTokenBalance,
+            contractAddress: tokenContractAddress,
+            standard: tokenStandard
+          });
+          totalBalance += formattedTokenBalance;
+
+        }
+      }
+  
+      setTokenBalances(tempArray);
+      setTotalBalance(totalBalance);
+
+    } catch (error) {
+      console.error('Error fetching token balances:', error);
+    }
+  }
 
   const generateAndSaveWallet = async (userId: string, username: string) => {
     try {
@@ -228,6 +297,8 @@ const WalletScreen = () => {
 
           if (matchedData.length > 0) {
             // Existing user
+            fetchTokenBalances(matchedData[0].publicKey);
+
             setData(matchedData);
             setPublicKey(matchedData[0].publicKey);
             setIvData(matchedData[0].iv);
@@ -251,38 +322,36 @@ const WalletScreen = () => {
   }, []);
 
   const handleCopy = () => {
-    if (spanRef.current) {
-      const textToCopy = spanRef.current.textContent;
-      if (textToCopy) {
-        navigator.clipboard.writeText(textToCopy)
-          .then(() => {
-            toast.success('Copied to clipboard!', {
-              position: "top-right",
-              autoClose: 3000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "dark",
-            });
-          })
-          .catch((err) => {
-            toast.error('Failed to copy!', {
-              position: "top-right",
-              autoClose: 3000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "dark",
-            });
-            console.error('Failed to copy: ', err);
+    if (address) {
+      navigator.clipboard.writeText(address)
+        .then(() => {
+          toast.success('Full address copied to clipboard!', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
           });
-      }
+        })
+        .catch((err) => {
+          toast.error('Failed to copy!', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
+          console.error('Failed to copy: ', err);
+        });
     }
   };
+  
    
   const toggleBalanceVisibility = () => {
     setIsBalanceVisible(!isBalanceVisible); // Toggle balance visibility
@@ -348,7 +417,7 @@ const WalletScreen = () => {
           <div>
             <span className="text-xl text-green-400">Main Balance</span>
             <h2 className="text-4xl mt-1 font-semibold">
-            {isBalanceVisible ? "$2,172.38" : "*****"}
+            {isBalanceVisible ? totalBalance.toFixed(8) : '*****'}
             </h2>
           </div>
           <img src="/eye.svg" alt="" className="h-6 w-6"
