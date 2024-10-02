@@ -28,7 +28,6 @@ import {
   Network,
  
 } from "@aptos-labs/ts-sdk";
-import crypto from 'crypto';
 
 
 
@@ -72,9 +71,12 @@ interface TabContentProps {
 
 
 
+
 const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
   const [price, setPrice] = useState(null);
   const [pnl, setPnl] = useState(null);
+
+
 
   useEffect(() => {
     const fetchPriceAndPnl = async () => {
@@ -133,6 +135,7 @@ const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
   return <p className="text-[#9F9F9F] text-base font-light text-center py-4">You don&apos;t have any NFTs yet</p>;
 };
 
+const NODE_URL = "https://fullnode.devnet.aptoslabs.com/v1";
 
 const WalletScreen = () => {
   const [activeTab, setActiveTab] = useState<TabType>('Tokens');
@@ -146,6 +149,7 @@ const WalletScreen = () => {
   const { ivData, setIvData } = useIvData();
   const { encryptedValue, setEncryptedValue } = useEncryptedValue();
 
+  
 
 
 
@@ -155,7 +159,7 @@ const WalletScreen = () => {
 
 
   const fetchTokenBalances = async (publicKey: string) => {
-    const TokensCollectionurl = 'https://api.testnet.aptoslabs.com/v1/graphql';
+    const TokensCollectionurl = 'https://api.devnet.aptoslabs.com/v1/graphql';
     const query = `
       query MyQuery {
         current_fungible_asset_balances(
@@ -259,7 +263,9 @@ const WalletScreen = () => {
       
             setData(matchedData);
           }
-         
+         else{
+
+         }
         } 
         catch (error) {
           console.error("Error fetching data: ", error);
