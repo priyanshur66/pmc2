@@ -135,9 +135,22 @@ const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
 };
 // ... (keep all your existing interfaces and constants)
 
-const NODE_URL = process.env.NEXT_PUBLIC_APTOS_NODE_URL || "https://fullnode.devnet.aptoslabs.com/v1";
+const NODE_URL = "https://fullnode.devnet.aptoslabs.com/v1";
+const crypto = require('crypto');
+const algorithm = 'aes-256-cbc'; // Example algorithm
+const key = crypto.createHash('sha256').update('KEY_TEST').digest();
+const iv = crypto.randomBytes(16);  
 
 const WalletScreen = () => {
+
+  function encrypt(text: string) {
+    const cipher = crypto.createCipheriv(algorithm, key, iv);
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+
+    return { iv: iv.toString('hex'), encryptedData: encrypted };
+}
+
 
   const [activeTab, setActiveTab] = useState<TabType>('Tokens');
   const [userData, setUserData] = useState<UserData | null>(null)
@@ -163,17 +176,20 @@ const WalletScreen = () => {
       // Get the account's address and private key
       const address = newAccount.address().hex();
       const privateKey = newAccount.toPrivateKeyObject().privateKeyHex;
+      const encryptedResult = encrypt(privateKey);
+
 
       // Prepare the data to save to Firestore
       const walletData = {
         id: userId,
         publicKey: address,
         userName: username,
-        iv: "your_iv_generation_logic", // Implement your IV generation logic
+        iv: encryptedResult.iv, // Store the IV from encryption result
         referralLink: `https://t.me/your_bot_username?start=${address}`,
         referredBy: "",
-        encryptedData: privateKey, // In a real app, encrypt this before storing
+        encryptedData: encryptedResult.encryptedData, // Store the encrypted private key
       };
+
 
       // Save to Firestore
       await setDoc(doc(db, "testWalletUsers", userId), walletData);
@@ -181,8 +197,8 @@ const WalletScreen = () => {
       // Update local state
       setData([walletData]);
       setPublicKey(address);
-      setIvData(walletData.iv);
-      setEncryptedValue(walletData.encryptedData);
+      setIvData(encryptedResult.iv);
+      setEncryptedValue(encryptedResult.encryptedData);
       setAddress(address);
 
       return walletData;
