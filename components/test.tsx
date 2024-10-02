@@ -289,21 +289,28 @@ const WalletScreen = () => {
                 <img src="/dropdown.svg" alt="" className="ml-4 w-6 h-6" />
               </div>
               <div className="flex ml-2">
-                      {data.length > 0 ? (
-  <span
-    ref={spanRef}
-    key={data[0].id}
-    className="text-s text-white font-extralight mt-1"
-  >
-    {data[0].publicKey.slice(0, 6)}...{data[0].publicKey.slice(-4)}
-  </span>
-) : (
-  <span 
-  ref={spanRef}
-  className="text-s text-white font-extralight mt-1">
-    Loading...
-  </span>
-)}
+              {isLoading ? (
+    <span 
+      ref={spanRef}
+      className="text-s text-white font-extralight mt-1"
+    >
+      Generating wallet...
+    </span>
+  ) : address ? (
+    <span
+      ref={spanRef}
+      className="text-s text-white font-extralight mt-1"
+    >
+      {address.slice(0, 6)}...{address.slice(-4)}
+    </span>
+  ) : (
+    <span 
+      ref={spanRef}
+      className="text-s text-white font-extralight mt-1"
+    >
+      Loading...
+    </span>
+  )}
 
                 <img onClick={handleCopy} src="/copy.svg" alt="" className="ml-2" />
 
