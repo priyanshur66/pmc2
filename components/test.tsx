@@ -325,7 +325,7 @@ const WalletScreen = () => {
     if (address) {
       navigator.clipboard.writeText(address)
         .then(() => {
-          toast.success('Full address copied to clipboard!', {
+          toast.success('copied to clipboard!', {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,

@@ -72,7 +72,7 @@ const TokenCard: React.FC<TokenCardProps> = ({
       const fetchData = async (msg: any) => {
         try {
           if (userData?.id) {
-            const querySnapshot = await getDocs(collection(db, "walletUsers"));
+            const querySnapshot = await getDocs(collection(db, "testWalletUsers"));
             const matchedData = querySnapshot.docs
               .map((doc) => ({
                 id: doc.id,
@@ -103,7 +103,7 @@ const TokenCard: React.FC<TokenCardProps> = ({
 
 
     const fetchTokenBalances = async (publicKey: string) => {
-      const TokensCollectionurl = 'https://api.testnet.aptoslabs.com/v1/graphql';
+      const TokensCollectionurl = 'https://api.devnet.aptoslabs.com/v1/graphql';
       const query = `
         query MyQuery {
           current_fungible_asset_balances(
