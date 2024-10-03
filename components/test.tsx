@@ -267,8 +267,9 @@ const WalletScreen = () => {
       setData([walletData]);
       setPublicKey(address);
       setIvData(encryptedResult.iv);
+      const res = usePublicKey.getState().publicKey;
       setEncryptedValue(encryptedResult.encryptedData);
-      setAddress(address);
+      setAddress(res);
 
       return walletData;
     } catch (error) {
@@ -303,7 +304,9 @@ const WalletScreen = () => {
             setPublicKey(matchedData[0].publicKey);
             setIvData(matchedData[0].iv);
             setEncryptedValue(matchedData[0].encryptedData);
-            setAddress(matchedData[0].publicKey);
+            const res = usePublicKey.getState().publicKey;
+            setAddress(res);
+
           } else {
             // New user - generate wallet
             const newWalletData = await generateAndSaveWallet(

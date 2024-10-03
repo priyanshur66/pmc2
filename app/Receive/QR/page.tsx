@@ -67,7 +67,7 @@ const AptosReceive = () => {
 
       {/* QR Code */}
       <div className="flex justify-center mb-6">
-        <div className="w-48 h-48 mt-6 bg-white p-2 rounded-xl">
+        <div className="w-50 h-50 mt-6 bg-white p-4 rounded-xl">
           <MyQRCode />
         </div>
       </div>
