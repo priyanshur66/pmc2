@@ -254,7 +254,6 @@ const WalletScreen = () => {
         publicKey: address,
         userName: username,
         iv: encryptedResult.iv, // Store the IV from encryption result
-        // referralLink: `https://t.me/your_bot_username?start=${address}`,
         referralLink: ` https://t.me/ZiptosWalletBot?start=${userId}`,
         referredBy: "",
         encryptedData: encryptedResult.encryptedData, // Store the encrypted private key
@@ -302,12 +301,12 @@ const WalletScreen = () => {
             fetchTokenBalances(matchedData[0].publicKey);
 
             setData(matchedData);
-            // setPublicKey(matchedData[0].publicKey);
+            setPublicKey(matchedData[0].publicKey);
             setIvData(matchedData[0].iv);
             setEncryptedValue(matchedData[0].encryptedData);
-            // const res = usePublicKey.getState().publicKey;
-            // setAddress(res);
-            // console.log(address)
+            const res = usePublicKey.getState().publicKey;
+            setAddress(res);
+            console.log(address)
 
           } 
           else {
@@ -327,18 +326,7 @@ const WalletScreen = () => {
     initializeUser();
   }, []);
 
-  useEffect(() => {
-    console.log("data is", data);
-    if (data.length > 0) {
-      fetchTokenBalances(data[0].publicKey);
-      setPublicKey(data[0].publicKey)
-      setIvData(data[0].iv)
-      setEncryptedValue(data[0].encryptedData)
-      const res = usePublicKey.getState().publicKey;
-      setAddress(res);
-      console.log(address);
-    }
-  }, [data]);
+ 
 
   const handleCopy = () => {
     if (address) {
@@ -436,7 +424,7 @@ const WalletScreen = () => {
           <div>
             <span className="text-xl text-green-400">Main Balance</span>
             <h2 className="text-4xl mt-1 font-semibold">
-            {isBalanceVisible ? totalBalance.toFixed(8) : '*****'}
+            {isBalanceVisible ? totalBalance.toFixed(3) : '*****'}
             </h2>
           </div>
           <img src="/eye.svg" alt="" className="h-6 w-6"
