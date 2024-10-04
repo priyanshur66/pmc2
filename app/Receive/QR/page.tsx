@@ -6,11 +6,86 @@ import MyQRCode from '@/components/MyQRCode';
 import { usePublicKey } from '@/store';
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { useState } from 'react';
+import db from "@/firebaseConfig";
+import WebApp from "@twa-dev/sdk";
+import { useEffect } from 'react';
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+
+
+interface UserData {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  language_code: string;
+  is_premium?: boolean;
+}
+interface MyData {
+  id: string;
+  publicKey: string;
+  userName: number;
+  iv: string;
+  referralLink: string;
+  referredBy: string;
+  encryptedData: string;
+}
+
+
 
 const AptosReceive = () => {
   const { publicKey } = usePublicKey();
   const router = useRouter();
-  const spanRef = useRef<HTMLSpanElement | null>(null);  // Reference for the wallet address span
+  const spanRef = useRef<HTMLSpanElement | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null)
+  const [data, setData] = useState<MyData[]>([]);
+
+
+  useEffect(() =>{
+    if (typeof window !== 'undefined') {
+
+    if (WebApp.initDataUnsafe.user) {
+      setUserData(WebApp.initDataUnsafe.user as UserData)
+    } 
+ } })
+  
+ useEffect(() => {
+  const fetchData = async (msg: any) => {
+    try {
+      if (userData?.id) {
+        const querySnapshot = await getDocs(collection(db, "testWalletUsers"));
+        const matchedData = querySnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter((doc) => doc.id === String(userData.id)) as MyData[];
+  
+        setData(matchedData);
+      }
+     else{
+
+     }
+    } 
+    catch (error) {
+      console.error("Error fetching data: ", error);
+    }
+  };
+
+  const msg = {
+    chat: {
+      id: userData?.id,
+      username: userData?.username || 'N/A',
+    },
+    text: '', // Set appropriate text if needed
+  };
+
+  fetchData(msg);
+}, [userData]);
+
+
+
+  
 
   const handleCopy = () => {
     if (spanRef.current) {
@@ -77,7 +152,7 @@ const AptosReceive = () => {
         <p className="text-white text-sm mb-2">Wallet Address &gt;</p>
         <div className="bg-[#434343] p-3 rounded-lg flex justify-between items-center">
           <span ref={spanRef} className="text-sm font-bold truncate mr-2">
-            {publicKey || 'Loading...'}
+          {data[0].publicKey}
           </span>
           <button onClick={handleCopy} className="p-1 rounded">
             <img src="/copy.svg" alt="Copy Icon" />
