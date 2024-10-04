@@ -544,9 +544,8 @@ const WalletScreen = () => {
       <div className="px-4 pt-4 pb-20 space-y-4">
         <div className="bg-[#484848]/50 rounded-lg w-full p-4 ">
 
-      {/* <TabContent activeTab={activeTab} /> */}
 
-      {tokenBalances.length > 0 ? (
+      {/* {tokenBalances.length > 0 ? (
         <div className="mt-4 space-y-4">
           {tokenBalances.map((token, index) => (
             <div key={index} className="flex justify-between items-center">
@@ -559,10 +558,42 @@ const WalletScreen = () => {
                   <p className="text-s text-[#9F9F9F]">{token.balance.toFixed(2)} {token.standard === 'v1' ? 'v1' : 'v2'}</p>
                 </div>
               </div>
-              {/* <p className="text-lg font-light">${(token.balance * (price || 0)).toFixed(2)}</p> */}
+              
             </div>
           ))}
-          </div>
+          </div> */}
+
+{tokenBalances.length > 0 ? (
+
+<div className="flex items-center justify-between">
+  
+         <div className="flex items-center space-x-2">
+              <div className="w-10 h-10 bg-[url('../public/aptos.svg')] rounded-full"></div>{" "}
+              {tokenBalances.map((token, index) => (
+
+              <div key={index} className="grid-rows-2">
+                <p className="font-semibold px-4 text-xl">{token.name}</p>
+                <span className="text-lg text-white font-medium">
+              {token.balance.toFixed(2)}                  </span>
+                <p className="font-light px-4 text-s mt-1">
+                  ${price || 0 * token.balance}
+                  <span className={pnl !== null && pnl >= 0 ? 'ml-1 text-green-500' : 'ml-1 text-red-500'}>
+                  {pnl !== null ?  String(pnl).slice(0, 4) : 'N/A'}%
+                  </span>
+                  
+                </p>
+
+              </div>
+                        ))}
+
+            </div> 
+            <div className="flex flex-col items-end">
+              <p className="text-xl font-bold">100 APT</p>
+              <p className="text-lg font-light">
+              ${Number(price || 0) * 100}              </p>
+            </div>
+      </div>
+
       ) : (
         <p className="text-[#9F9F9F] text-base font-light text-center py-4">
           You don&apos;t have any tokens yet
