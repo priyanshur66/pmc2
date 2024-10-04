@@ -8,22 +8,23 @@ export default function SendAPT() {
   const [address, setAddress] = useState('');
   const router = useRouter();
   const { toKey, setToKey } = useToKey();
+  const [isValidAddress, setIsValidAddress] = useState(false); // State to track valid address
+
 
   const handleAddressChange = (value: string): void => {
     console.log("Handling address change", value);
     setAddress(value);
     setToKey(value);
+    
+    // Check if the entered address is a valid Aptos address
+    const isValidAptosAddress = /^0x[a-fA-F0-9]{61,64}$/.test(value.trim());
+    setIsValidAddress(isValidAptosAddress);
     console.log("Entered address:", value);
   };
 
   const handleNext = () => {
-    const isValidAptosAddress = /^0x[a-fA-F0-9]{61,64}$/.test(address);
-    
-    if (address.trim() !== '' && isValidAptosAddress) {
+    if (isValidAddress) {
       router.push('/Send/Address/Amount');
-    } else {
-      console.log("Invalid Aptos address");
-      // Optionally, show an error message to the user
     }
   };
 
@@ -68,10 +69,10 @@ export default function SendAPT() {
       <div className="mt-auto px-4 mb-6">
         <button
           className={`w-full py-3 rounded-lg font-bold text-base ${
-            address.trim() !== '' ? 'bg-[#F33439] text-white' : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+            isValidAddress? 'bg-[#F33439] text-white' : 'bg-gray-500 text-gray-300 cursor-not-allowed'
           }`}
           onClick={handleNext}
-          disabled={address.trim() === ''}
+          disabled={!isValidAddress}
         >
           Next
         </button>
