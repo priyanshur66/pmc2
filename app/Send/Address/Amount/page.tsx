@@ -9,7 +9,7 @@ import { useTransactionHash } from "@/store";
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
 import { useCurrentBalance } from "@/store";
-
+import axios from "axios";
 
 const NODE_URL = 'https://fullnode.testnet.aptoslabs.com/v1';
 const aptosClient = new AptosClient(NODE_URL);
@@ -71,7 +71,7 @@ export default function EnterAmount(): JSX.Element {
   const [amount, setAmount] = useState<string>("");
   const [amountUSD, setAmountUSD] = useState<number>(0);
   const {currentBalance} = useCurrentBalance()
-  const availableAmount= currentBalance;
+  const availableAmount=  Math.round(currentBalance * 100) / 100;;
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [data, setData] = useState<MyData[]>([]);
@@ -83,6 +83,34 @@ export default function EnterAmount(): JSX.Element {
   const router = useRouter();
   const { toKey } = useToKey();
   const toAddress = toKey;
+
+  const [price, setPrice] = useState(null);
+  const [pnl, setPnl] = useState(null);
+
+  useEffect(() => {
+    const fetchPriceAndPnl = async () => {
+      try {
+        const response = await axios.get(
+          'https://api.coingecko.com/api/v3/coins/markets',
+          {
+            params: {
+              vs_currency: 'usd',
+              ids: 'aptos',
+            },
+          }
+        );
+
+        const coinData = response.data[0];
+        setPrice(coinData.current_price);
+        setPnl(coinData.price_change_percentage_24h);
+      } catch (error) {
+        console.error('Error fetching APT price and PnL:', error);
+      }
+    };
+
+    fetchPriceAndPnl();
+  }, []);
+
 
   const addDebugInfo = (info: string) => {
     setDebugInfo(prev => [...prev, info]);
@@ -146,7 +174,7 @@ export default function EnterAmount(): JSX.Element {
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
       setAmount(value);
       const numericValue: number = parseFloat(value) || 0;
-      setAmountUSD(numericValue * 1);
+      setAmountUSD(numericValue * (price || 0));
       addDebugInfo(`Amount set: ${value}, USD: ${numericValue * 1}`);
     }
   };
@@ -257,12 +285,12 @@ export default function EnterAmount(): JSX.Element {
       </div>
       
       {/* Debug Information Section */}
-      <div className="mt-4 p-4 bg-[#212020] rounded-lg overflow-y-auto max-h-40">
+      {/* <div className="mt-4 p-4 bg-[#212020] rounded-lg overflow-y-auto max-h-40">
         <h3 className="text-lg font-bold mb-2">Debug Info:</h3>
         {debugInfo.map((info, index) => (
           <p key={index} className="text-sm text-gray-300">{info}</p>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 }

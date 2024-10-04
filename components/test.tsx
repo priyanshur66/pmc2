@@ -167,6 +167,32 @@ const WalletScreen = () => {
   const { encryptedValue, setEncryptedValue } = useEncryptedValue();
   // ... (keep all your existing state variables)
   const [isLoading, setIsLoading] = useState(false);
+  const [price, setPrice] = useState(null);
+  const [pnl, setPnl] = useState(null);
+
+  useEffect(() => {
+    const fetchPriceAndPnl = async () => {
+      try {
+        const response = await axios.get(
+          'https://api.coingecko.com/api/v3/coins/markets',
+          {
+            params: {
+              vs_currency: 'usd',
+              ids: 'aptos',
+            },
+          }
+        );
+
+        const coinData = response.data[0];
+        setPrice(coinData.current_price);
+        setPnl(coinData.price_change_percentage_24h);
+      } catch (error) {
+        console.error('Error fetching APT price and PnL:', error);
+      }
+    };
+
+    fetchPriceAndPnl();
+  }, []);
 
   const fetchTokenBalances = async (publicKey: string) => {
     const TokensCollectionurl = 'https://api.testnet.aptoslabs.com/v1/graphql';
@@ -425,8 +451,8 @@ const WalletScreen = () => {
         <div className="bg-[#323030]/40 p-6 mx-4 rounded-xl flex justify-between items-center">
           <div>
             <span className="text-xl text-green-400">Main Balance</span>
-            <h2 className="text-4xl mt-1 font-semibold">
-            {isBalanceVisible ? totalBalance.toFixed(3) : '*****'}
+            <h2 className="text-4xl mt-1 font-semibold"> $
+            {isBalanceVisible ? (totalBalance * (price || 0)).toFixed(3) : '*****'}
             </h2>
           </div>
           <img src="/eye.svg" alt="" className="h-6 w-6"
