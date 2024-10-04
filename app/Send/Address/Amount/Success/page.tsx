@@ -21,21 +21,8 @@ const TransactionSuccess: React.FC = ({
   
 }) => {
     const router = useRouter();
-    // const {toKey} = useToKey();
-    // const toAddress = toKey;
-    const [currentDate, setCurrentDate] = useState<Date>(new Date());
-    const [selectedDate, setSelectedDate] = useState<string>('');
+ 
 
-    useEffect(() => {
-        const timer = setInterval(() => {
-          setCurrentDate(new Date());
-        }, 1000);
-    
-        return () => {
-          clearInterval(timer);
-        };
-      }, []);
-    
       const [transactionDetails, setTransactionDetails] = useState<TransactionDetails | null>(null);
       const [loading, setLoading] = useState(true);
       const [error, setError] = useState<string | null>(null);
@@ -45,9 +32,9 @@ const TransactionSuccess: React.FC = ({
     
       useEffect(() => {
         const fetchTransactionDetails = async () => {
-          try {
+          try {   
             // Replace this URL with the actual explorer API endpoint
-            const response = await fetch(`https://api.explorer.example.com/v1/transactions/${txnHash}`);
+            const response = await fetch(`https://fullnode.testnet.aptoslabs.com/v1/transactions/${txnHash}`);
             if (!response.ok) {
               throw new Error('Failed to fetch transaction details');
             }
