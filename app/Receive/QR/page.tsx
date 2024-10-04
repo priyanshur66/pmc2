@@ -10,6 +10,7 @@ import { useState } from 'react';
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
 import { useEffect } from 'react';
+
 import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
 
 
@@ -34,11 +35,14 @@ interface MyData {
 
 
 const AptosReceive = () => {
-  const { publicKey } = usePublicKey();
+  // const { publicKey } = usePublicKey();
   const router = useRouter();
   const spanRef = useRef<HTMLSpanElement | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null)
   const [data, setData] = useState<MyData[]>([]);
+  const { publicKey, setPublicKey } = usePublicKey();
+  const [address, setAddress] = useState("")
+
 
 
   useEffect(() =>{
@@ -83,7 +87,15 @@ const AptosReceive = () => {
   fetchData(msg);
 }, [userData]);
 
-
+useEffect(() => {
+  console.log("data is", data);
+  if (data.length > 0) {
+    setPublicKey(data[0].publicKey)
+    const res = usePublicKey.getState().publicKey;
+    setAddress(res);
+    console.log(address);
+  }
+}, [data]);
 
   
 
