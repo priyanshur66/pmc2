@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AptosAccount, Types, HexString, AptosClient } from 'aptos';
 import { useToKey } from "@/store";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { useTransactionHash } from "@/store";
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
 
@@ -43,7 +44,6 @@ function decryptPrivateKey(encryptedData: string, iv: string, key: Buffer): stri
 
 const key = crypto.createHash('sha256').update('KEY_TEST').digest();
 
-const accountAddress = '0xbb629c088b696f8c3500d0133692a1ad98a90baef9d957056ec4067523181e9a';
 
 async function transferLegacyCoin(amount: number, privateKey: Uint8Array, toAddress: string) {
   try {
@@ -74,6 +74,8 @@ export default function EnterAmount(): JSX.Element {
   const [data, setData] = useState<MyData[]>([]);
   const [privateKey, setPrivateKey] = useState<Uint8Array | null>(null);
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
+  const { transactionHash, setTransactionHash } = useTransactionHash();
+
 
   const router = useRouter();
   const { toKey } = useToKey();
@@ -173,6 +175,8 @@ export default function EnterAmount(): JSX.Element {
       addDebugInfo(`Initiating transfer: Amount: ${adjustedAmount}, To: ${toAddress}`);
       const txnHash = await transferLegacyCoin(adjustedAmount, privateKey, toAddress);
       addDebugInfo(`Transaction successful with hash: ${txnHash}`);
+      setTransactionHash(txnHash)
+
 
       router.push('/Send/Address/Amount/Success');
     } catch (error) {
@@ -245,7 +249,7 @@ export default function EnterAmount(): JSX.Element {
           onClick={handleNextClick}
           disabled={isLoading}
         >
-          {isLoading ? 'Processing...' : 'Next'}
+          {isLoading ? 'Processing...' : 'Confirm'}
         </button>
       </div>
       

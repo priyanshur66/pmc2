@@ -16,6 +16,10 @@ interface encryptedState {
   encryptedValue: string;
   setEncryptedValue: (key: string) => void;
 }
+interface transactionState {
+  transactionHash: string;
+  setTransactionHash: (key: string) => void;
+}
 
 
 export const usePublicKey = create<PublicKeyState>()(
@@ -70,4 +74,17 @@ export const useEncryptedValue = create<encryptedState>()(
     }
   )
   
+);
+
+export const useTransactionHash = create <transactionState>()(
+  persist(
+    (set) => ({
+      transactionHash: '',
+      setTransactionHash: (key) => set({transactionHash: key}),
+    }),
+    {
+      name: 'public-key-storage',
+      storage: createJSONStorage(()=>localStorage),
+    }
+  )
 );
