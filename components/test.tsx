@@ -580,9 +580,7 @@ const WalletScreen = () => {
           <div className="w-10 h-10 bg-[url('../public/aptos.svg')] rounded-full"></div>
           <div className="grid-rows-2">
             <p className="font-semibold px-4 text-xl">{token.symbol}</p>
-            <span className="text-lg text-white font-medium">
-              {token.balance.toFixed(2)}
-            </span>
+
             <p className="font-light px-4 text-s mt-1">
               ${price}
               <span
