@@ -39,6 +39,7 @@ interface TokenBalance {
   balance: number;
   contractAddress: string;
   standard: string;
+  symbol: string;
 }
 
 interface UserData {
@@ -231,13 +232,16 @@ const WalletScreen = () => {
         const tokenContractAddress = balance.metadata.asset_type;
         const tokenStandard = balance.token_standard;
         const formattedTokenBalance = tokenBalance / (10 ** tokenDecimals);
+        const tokenSymbol = balance.metadata.symbol;
   
         if (tokenStandard === 'v1' && !tokenName.includes('LP')) {
           tempArray.push({
             name: tokenName,
             balance: formattedTokenBalance,
             contractAddress: tokenContractAddress,
-            standard: tokenStandard
+            standard: tokenStandard,
+            symbol: tokenSymbol
+
           });
           totalBalance += formattedTokenBalance;
 
@@ -246,7 +250,10 @@ const WalletScreen = () => {
             name: tokenName,
             balance: formattedTokenBalance,
             contractAddress: tokenContractAddress,
-            standard: tokenStandard
+            standard: tokenStandard,
+            symbol: tokenSymbol
+            
+
           });
           totalBalance += formattedTokenBalance;
 
@@ -572,7 +579,7 @@ const WalletScreen = () => {
         <div className="flex items-center space-x-2">
           <div className="w-10 h-10 bg-[url('../public/aptos.svg')] rounded-full"></div>
           <div className="grid-rows-2">
-            <p className="font-semibold px-4 text-xl">{token.name}</p>
+            <p className="font-semibold px-4 text-xl">{token.symbol}</p>
             <span className="text-lg text-white font-medium">
               {token.balance.toFixed(2)}
             </span>
@@ -594,7 +601,8 @@ const WalletScreen = () => {
           <span className="text-lg text-white font-medium">
             {token.balance.toFixed(2)}
           </span>
-          <p className="text-xl font-bold">{token.balance * (price || 0)}</p>
+          <p className="text-xl font-bold">  {(token.balance * (price || 0)).toFixed(2)}
+          </p>
         </div>
       </div>
     ))}
