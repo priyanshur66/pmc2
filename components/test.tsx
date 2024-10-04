@@ -21,7 +21,7 @@ import { AptosClient, AptosAccount, FaucetClient } from "aptos";
 import { usePublicKey } from "@/store";
 import { useIvData } from "@/store";
 import { useEncryptedValue } from "@/store";
-
+import { useCurrentBalance } from "@/store";
 import {
   
   Aptos,
@@ -157,6 +157,7 @@ const WalletScreen = () => {
   const [data, setData] = useState<MyData[]>([]);
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
   const [totalBalance, setTotalBalance] = useState<number>(0);
+  const {currentBalance, setCurrentBalance} = useCurrentBalance();
 
   const [address, setAddress] = useState("")
   const [isBalanceVisible, setIsBalanceVisible] = useState(true); // State to control balance visibility
@@ -228,6 +229,7 @@ const WalletScreen = () => {
   
       setTokenBalances(tempArray);
       setTotalBalance(totalBalance);
+      setCurrentBalance(totalBalance);
 
     } catch (error) {
       console.error('Error fetching token balances:', error);

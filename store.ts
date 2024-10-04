@@ -20,6 +20,10 @@ interface transactionState {
   transactionHash: string;
   setTransactionHash: (key: string) => void;
 }
+interface currentBalanceState {
+  currentBalance: number;
+  setCurrentBalance: (key: number) => void;
+}
 
 
 export const usePublicKey = create<PublicKeyState>()(
@@ -81,6 +85,18 @@ export const useTransactionHash = create <transactionState>()(
     (set) => ({
       transactionHash: '',
       setTransactionHash: (key) => set({transactionHash: key}),
+    }),
+    {
+      name: 'public-key-storage',
+      storage: createJSONStorage(()=>localStorage),
+    }
+  )
+);
+export const useCurrentBalance = create <currentBalanceState>()(
+  persist(
+    (set) => ({
+      currentBalance: parseFloat('') || 0,
+      setCurrentBalance: (key) => set({currentBalance: key}),
     }),
     {
       name: 'public-key-storage',

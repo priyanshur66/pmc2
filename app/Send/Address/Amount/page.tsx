@@ -8,6 +8,8 @@ import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { useTransactionHash } from "@/store";
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
+import { useCurrentBalance } from "@/store";
+
 
 const NODE_URL = 'https://fullnode.testnet.aptoslabs.com/v1';
 const aptosClient = new AptosClient(NODE_URL);
@@ -68,7 +70,8 @@ async function transferLegacyCoin(amount: number, privateKey: Uint8Array, toAddr
 export default function EnterAmount(): JSX.Element {
   const [amount, setAmount] = useState<string>("");
   const [amountUSD, setAmountUSD] = useState<number>(0);
-  const availableAmount: number = 512.34;
+  const {currentBalance} = useCurrentBalance()
+  const availableAmount= currentBalance;
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [data, setData] = useState<MyData[]>([]);
