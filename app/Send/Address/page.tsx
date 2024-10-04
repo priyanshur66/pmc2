@@ -17,8 +17,13 @@ export default function SendAPT() {
   };
 
   const handleNext = () => {
-    if (address.trim() !== '') {
+    const isValidAptosAddress = /^0x[a-fA-F0-9]{61,64}$/.test(address);
+    
+    if (address.trim() !== '' && isValidAptosAddress) {
       router.push('/Send/Address/Amount');
+    } else {
+      console.log("Invalid Aptos address");
+      // Optionally, show an error message to the user
     }
   };
 
