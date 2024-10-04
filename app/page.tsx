@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import WebApp from "@twa-dev/sdk";
 import WalletScreen from "@/components/test";
+// import WalletScreen from "@/components/WalletScreen";
 // import { MoonPayProvider } from "@moonpay/moonpay-react";
 
 interface UserData {
@@ -28,8 +29,8 @@ export default function Home() {
 //     debug
 // >
     <main className="bg-[#0F0F0F] text-white min-h-screen items-center w-full ">
-          {/* <WalletScreen/> */}
           <WalletScreen/>
+          {/* <WalletScreen/> */}
     </main>
     // </MoonPayProvider>
   );

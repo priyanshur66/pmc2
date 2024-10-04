@@ -218,17 +218,11 @@ const WalletScreen = () => {
   };
 
 
-  // useEffect(() => {
-  //   if (data.length > 0) {
-  //     fetchTokenBalances(data[0].publicKey);
-  //   }
-  // }, [data, fetchTokenBalances]);
+
   useEffect(() => {
     console.log("data is", data);
     if (data.length > 0) {
       fetchTokenBalances(data[0].publicKey);
-      
-      // usePublicKey.setState({ publicKey: data[0].publicKey });
       setPublicKey(data[0].publicKey)
       setIvData(data[0].iv)
       setEncryptedValue(data[0].encryptedData)
