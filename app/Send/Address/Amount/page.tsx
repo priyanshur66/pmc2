@@ -8,7 +8,7 @@ import { getFirestore, collection, getDocs } from "firebase/firestore";
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
 
-const NODE_URL = 'https://fullnode.devnet.aptoslabs.com/v1';
+const NODE_URL = 'https://fullnode.testnet.aptoslabs.com/v1';
 const aptosClient = new AptosClient(NODE_URL);
 const crypto = require('crypto');
 

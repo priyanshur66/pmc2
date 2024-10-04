@@ -135,7 +135,7 @@ const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
 };
 // ... (keep all your existing interfaces and constants)
 
-const NODE_URL = "https://fullnode.devnet.aptoslabs.com/v1";
+const NODE_URL = "https://fullnode.testnet.aptoslabs.com/v1";
 const crypto = require('crypto');
 const algorithm = 'aes-256-cbc'; // Example algorithm
 const key = crypto.createHash('sha256').update('KEY_TEST').digest();
@@ -168,7 +168,7 @@ const WalletScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchTokenBalances = async (publicKey: string) => {
-    const TokensCollectionurl = 'https://api.devnet.aptoslabs.com/v1/graphql';
+    const TokensCollectionurl = 'https://api.testnet.aptoslabs.com/v1/graphql';
     const query = `
       query MyQuery {
         current_fungible_asset_balances(
