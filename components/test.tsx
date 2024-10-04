@@ -563,42 +563,48 @@ const WalletScreen = () => {
           ))}
           </div> */}
 
+
+
 {tokenBalances.length > 0 ? (
-
-<div className="flex items-center justify-between">
-  
-         <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-[url('../public/aptos.svg')] rounded-full"></div>{" "}
-              {tokenBalances.map((token, index) => (
-
-              <div key={index} className="grid-rows-2">
-                <p className="font-semibold px-4 text-xl">{token.name}</p>
-                <span className="text-lg text-white font-medium">
-              {token.balance.toFixed(2)}                  </span>
-                <p className="font-light px-4 text-s mt-1">
-                  ${price || 0 * token.balance}
-                  <span className={pnl !== null && pnl >= 0 ? 'ml-1 text-green-500' : 'ml-1 text-red-500'}>
-                  {pnl !== null ?  String(pnl).slice(0, 4) : 'N/A'}%
-                  </span>
-                  
-                </p>
-
-              </div>
-                        ))}
-
-            </div> 
-            <div className="flex flex-col items-end">
-              <p className="text-xl font-bold">100 APT</p>
-              <p className="text-lg font-light">
-              ${Number(price || 0) * 100}              </p>
-            </div>
+  <div className="flex flex-col space-y-4">
+    {tokenBalances.map((token, index) => (
+      <div key={index} className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <div className="w-10 h-10 bg-[url('../public/aptos.svg')] rounded-full"></div>
+          <div className="grid-rows-2">
+            <p className="font-semibold px-4 text-xl">{token.name}</p>
+            <span className="text-lg text-white font-medium">
+              {token.balance.toFixed(2)}
+            </span>
+            <p className="font-light px-4 text-s mt-1">
+              ${price}
+              <span
+                className={
+                  pnl !== null && pnl >= 0
+                    ? "ml-1 text-green-500"
+                    : "ml-1 text-red-500"
+                }
+              >
+                {pnl !== null ? String(pnl).slice(0, 4) : "N/A"}%
+              </span>
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col items-end">
+          <span className="text-lg text-white font-medium">
+            {token.balance.toFixed(2)}
+          </span>
+          <p className="text-xl font-bold">{token.balance * (price || 0)}</p>
+        </div>
       </div>
+    ))}
+  </div>
+) : (
+  <p className="text-[#9F9F9F] text-base font-light text-center py-4">
+    You don&apos;t have any tokens yet
+  </p>
+)}
 
-      ) : (
-        <p className="text-[#9F9F9F] text-base font-light text-center py-4">
-          You don&apos;t have any tokens yet
-        </p>
-      )}
 
 
         </div>
