@@ -246,7 +246,6 @@ const WalletScreen = () => {
       const address = newAccount.address().hex();
       const privateKey = newAccount.toPrivateKeyObject().privateKeyHex;
       const encryptedResult = encrypt(privateKey);
-      setPublicKey(address);
 
 
       // Prepare the data to save to Firestore
