@@ -87,7 +87,7 @@ const TransactionSuccess: React.FC = () => {
     payload,
   } = transactionDetails;
 
-  const date = new Date(Math.floor(parseInt(timestamp) / 1000000));
+  const date = new Date(Math.floor(parseInt(timestamp) / 1000));
   const amount = payload.arguments[1];
 
   return (
