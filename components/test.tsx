@@ -599,7 +599,7 @@ const WalletScreen = () => {
           <span className="text-lg text-white font-medium">
             {token.balance.toFixed(2)}
           </span>
-          <p className="text-xl font-bold">  {(token.balance * (price || 0)).toFixed(2)}
+          <p className="text-xl font-bold"> $ {(token.balance * (price || 0)).toFixed(2)}
           </p>
         </div>
       </div>
