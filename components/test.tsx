@@ -265,6 +265,7 @@ const WalletScreen = () => {
 
       // Update local state
       setData([walletData]);
+      setPublicKey(address);
       setIvData(encryptedResult.iv);
       const res = usePublicKey.getState().publicKey;
       setEncryptedValue(encryptedResult.encryptedData);
@@ -300,12 +301,12 @@ const WalletScreen = () => {
             fetchTokenBalances(matchedData[0].publicKey);
 
             setData(matchedData);
-            // setPublicKey(matchedData[0].publicKey);
+            setPublicKey(matchedData[0].publicKey);
             setIvData(matchedData[0].iv);
             setEncryptedValue(matchedData[0].encryptedData);
-            // const res = usePublicKey.getState().publicKey;
-            // setAddress(res);
-            // console.log(address)
+            const res = usePublicKey.getState().publicKey;
+            setAddress(res);
+            console.log(address)
 
           } 
           else {
@@ -325,8 +326,6 @@ const WalletScreen = () => {
     initializeUser();
   }, []);
 
-
-  
  
 
   const handleCopy = () => {
