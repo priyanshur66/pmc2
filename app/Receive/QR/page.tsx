@@ -151,9 +151,20 @@ const AptosReceive = () => {
       <div className="mb-4">
         <p className="text-white text-sm mb-2">Wallet Address &gt;</p>
         <div className="bg-[#434343] p-3 rounded-lg flex justify-between items-center">
-          <span ref={spanRef} className="text-sm font-bold truncate mr-2">
+
+        {data.length > 0 ? (
+
+          <span
+          key={data[0].id}
+          ref={spanRef} className="text-sm font-bold truncate mr-2">
+
           {data[0].publicKey}
           </span>
+        ) : (
+          <span ref={spanRef} className="text-sm font-bold truncate mr-2">
+            Loading...
+          </span>
+          )}
           <button onClick={handleCopy} className="p-1 rounded">
             <img src="/copy.svg" alt="Copy Icon" />
           </button>
