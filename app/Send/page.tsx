@@ -43,7 +43,7 @@ interface TokenCardProps {
     // symbol: string;
     // price: string;
     // change: string;
-    iconSrc: string;
+    // iconSrc: string;
     // changePositive: boolean;
   }
 
@@ -52,7 +52,7 @@ const TokenCard: React.FC<TokenCardProps> = ({
     // symbol,
     // price,
     // change,
-    iconSrc,
+    // iconSrc,
     // changePositive,
   }) => {
     const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
@@ -178,18 +178,20 @@ const TokenCard: React.FC<TokenCardProps> = ({
   
 
     return (
-            
-      <div className="bg-[#484848] rounded-2xl p-4 flex justify-between items-center mb-4 shadow-lg">
+      <div>
+
+      {tokenBalances.map((token, index) => (
+
+      <div key={index} className="bg-[#484848] rounded-2xl p-4 flex justify-between items-center mb-4 shadow-lg">
           <a href='/Send/Address'>
         <div className="flex items-center">
-          <img
+          {/* <img
             src={iconSrc}
             alt=""
             className="w-12 h-12 rounded-full mr-4"
-          />
-            {tokenBalances.map((token, index) => (
+          /> */}
 
-          <div key={index}>
+          <div >
             <h2 className="text-lg font-bold">
             {token.name}
             </h2>
@@ -198,13 +200,15 @@ const TokenCard: React.FC<TokenCardProps> = ({
 
             </p>
           </div>
-                      ))}
 
         </div>
         </a>
 
-       
       </div>
+            ))}
+
+</div>
+
       
 
 
@@ -252,7 +256,7 @@ const Send = () => {
           // symbol="0"
           // price="521.90 APT"
           // change=""
-          iconSrc="aptos.svg"
+          // iconSrc="aptos.svg"
           // changePositive={true}
 
         />
