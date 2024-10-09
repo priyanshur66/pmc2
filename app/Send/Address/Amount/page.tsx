@@ -280,7 +280,7 @@ export default function EnterAmount(): JSX.Element {
         <div className="flex items-center justify-between">
           <div className="text-left px-4">
             <span className="text-[#FBFFFC] block">Available to send</span>
-            <span className="block font-bold text-base">{availableAmount} APT</span>
+            <span className="block font-bold text-base">{availableAmount} {currentSymbol}</span>
           </div>
           <div className="flex items-center">
             <button

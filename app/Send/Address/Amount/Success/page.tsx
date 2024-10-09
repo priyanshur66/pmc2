@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTransactionHash } from "@/store";
 import { formatDistanceToNow } from "date-fns";
+import { useCurrentSymbol } from "@/store";
 
 interface TransactionDetails {
   timestamp: string;
@@ -25,6 +26,7 @@ const TransactionSuccess: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { transactionHash } = useTransactionHash();
   const txnHash = transactionHash;
+  const {currentSymbol} = useCurrentSymbol();
 
   useEffect(() => {
     const fetchTransactionDetails = async () => {
@@ -107,7 +109,7 @@ const TransactionSuccess: React.FC = () => {
         </div>
       </div>
 
-      <div className="text-center text-3xl font-bold mb-6">{parseInt(amount) / 100000000} APT</div>
+      <div className="text-center text-3xl font-bold mb-6">{parseInt(amount) / 100000000} {currentSymbol}</div>
 
       <div className="space-y-3 mb-6 bg-[#1414144F] rounded-2xl m-4 p-4">
         <div className="flex justify-between">
