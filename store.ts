@@ -28,6 +28,10 @@ interface currentSymbolState {
   currentSymbol: string;
   setCurrentSymbol: (key: string) => void;
 }
+interface selectedTokenState {
+  selectedToken: string;
+  setSelectedToken: (key: string) => void;
+}
 
 
 export const usePublicKey = create<PublicKeyState>()(
@@ -113,6 +117,19 @@ export const useCurrentSymbol = create <currentSymbolState>()(
     (set) => ({
       currentSymbol: '' ,
       setCurrentSymbol: (key) => set({currentSymbol: key}),
+    }),
+    {
+      name: 'public-key-storage',
+      storage: createJSONStorage(()=>localStorage),
+    }
+  )
+);
+
+export const useSelectedToken = create <selectedTokenState>()(
+  persist(
+    (set) => ({
+      selectedToken: '' ,
+      setSelectedToken: (key) => set({selectedToken: key}),
     }),
     {
       name: 'public-key-storage',

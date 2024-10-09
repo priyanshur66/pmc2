@@ -10,6 +10,7 @@ import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
 import { strict } from 'assert';
 import { useCurrentSymbol } from '@/store';
+import { useSelectedToken } from '@/store';
 
 
 interface UserData {
@@ -61,6 +62,7 @@ const TokenCard: React.FC<TokenCardProps> = ({
     const [userData, setUserData] = useState<UserData | null>(null);
     const router = useRouter();
     const {currentSymbol, setCurrentSymbol} = useCurrentSymbol();
+    const {setSelectedToken} = useSelectedToken();
 
 
 
@@ -73,7 +75,9 @@ const TokenCard: React.FC<TokenCardProps> = ({
       } 
    } })
 
-   const handleTokenClick = (contractAddress: string) => {
+   const handleTokenClick = (contractAddress: string,tokenSymbol:string) => {
+    setCurrentSymbol(tokenSymbol)
+    setSelectedToken(contractAddress)
     router.push(`/Send/Address?contractAddress=${encodeURIComponent(contractAddress)}`);
   };
 
@@ -198,7 +202,7 @@ const TokenCard: React.FC<TokenCardProps> = ({
       <div key={index} 
       
       className="bg-[#484848] rounded-2xl p-4 flex justify-between items-center mb-4 shadow-lg"
-      onClick={() => handleTokenClick(token.contractAddress)}
+      onClick={() => handleTokenClick(token.contractAddress,token.symbol)}
       >
           {/* <a href='/Send/Address'> */}
         <div className="flex items-center">

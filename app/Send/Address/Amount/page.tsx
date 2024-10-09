@@ -11,6 +11,7 @@ import WebApp from "@twa-dev/sdk";
 import { useCurrentBalance } from "@/store";
 import axios from "axios";
 import { useCurrentSymbol } from "@/store";
+import { useSelectedToken } from "@/store";
 
 const NODE_URL = 'https://fullnode.testnet.aptoslabs.com/v1';
 const aptosClient = new AptosClient(NODE_URL);
@@ -88,6 +89,7 @@ export default function EnterAmount(): JSX.Element {
   const { toKey } = useToKey();
   const toAddress = toKey;
   const { currentSymbol } = useCurrentSymbol();
+  const {selectedToken} = useSelectedToken();
   const symbol = currentSymbol;
 
   const [price, setPrice] = useState(null);
@@ -95,8 +97,10 @@ export default function EnterAmount(): JSX.Element {
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const contractAddressParam = searchParams.get('contractAddress');
+    const contractAddressParam = selectedToken;
+    console.log("outIF",contractAddressParam)
     if (contractAddressParam) {
+      console.log("inIF",contractAddressParam)
       setContractAddress(contractAddressParam);
     }
   }, []);
