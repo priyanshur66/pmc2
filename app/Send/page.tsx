@@ -57,7 +57,9 @@ const TokenCard: React.FC<TokenCardProps> = ({
   }) => {
     const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
     const [data, setData] = useState<MyData[]>([]);
-    const [userData, setUserData] = useState<UserData | null>(null)
+    const [userData, setUserData] = useState<UserData | null>(null);
+    const router = useRouter();
+
 
 
     useEffect(() =>{
@@ -67,6 +69,10 @@ const TokenCard: React.FC<TokenCardProps> = ({
         setUserData(WebApp.initDataUnsafe.user as UserData)
       } 
    } })
+
+   const handleTokenClick = (contractAddress: string) => {
+    router.push(`/Send/Address?contractAddress=${encodeURIComponent(contractAddress)}`);
+  };
 
     useEffect(() => {
       const fetchData = async (msg: any) => {
@@ -182,8 +188,12 @@ const TokenCard: React.FC<TokenCardProps> = ({
 
       {tokenBalances.map((token, index) => (
 
-      <div key={index} className="bg-[#484848] rounded-2xl p-4 flex justify-between items-center mb-4 shadow-lg">
-          <a href='/Send/Address'>
+      <div key={index} 
+      
+      className="bg-[#484848] rounded-2xl p-4 flex justify-between items-center mb-4 shadow-lg"
+      onClick={() => handleTokenClick(token.contractAddress)}
+      >
+          {/* <a href='/Send/Address'> */}
         <div className="flex items-center">
           {/* <img
             src={iconSrc}
@@ -202,7 +212,7 @@ const TokenCard: React.FC<TokenCardProps> = ({
           </div>
 
         </div>
-        </a>
+        {/* </a> */}
 
       </div>
             ))}

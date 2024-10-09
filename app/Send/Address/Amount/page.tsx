@@ -47,9 +47,9 @@ function decryptPrivateKey(encryptedData: string, iv: string, key: Buffer): stri
 const key = crypto.createHash('sha256').update('KEY_TEST').digest();
 
 
-async function transferLegacyCoin(amount: number, privateKey: Uint8Array, toAddress: string) {
+async function transferLegacyCoin(amount: number, privateKey: Uint8Array, toAddress: string, contractAddress: string) {
   try {
-    const contractAddress = '0x1::aptos_coin::AptosCoin';
+    // const contractAddress = '0x1::aptos_coin::AptosCoin';
     const sender = new AptosAccount(privateKey);
     const payload = {
       type: 'entry_function_payload',
@@ -79,6 +79,9 @@ export default function EnterAmount(): JSX.Element {
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const { transactionHash, setTransactionHash } = useTransactionHash();
 
+  const [contractAddress, setContractAddress] = useState<string>('');
+
+
 
   const router = useRouter();
   const { toKey } = useToKey();
@@ -86,6 +89,15 @@ export default function EnterAmount(): JSX.Element {
 
   const [price, setPrice] = useState(null);
   const [pnl, setPnl] = useState(null);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const contractAddressParam = searchParams.get('contractAddress');
+    if (contractAddressParam) {
+      setContractAddress(contractAddressParam);
+    }
+  }, []);
+
 
   useEffect(() => {
     const fetchPriceAndPnl = async () => {
@@ -204,7 +216,7 @@ export default function EnterAmount(): JSX.Element {
       const adjustedAmount = Math.round(numericAmount * (10 ** 8));
 
       addDebugInfo(`Initiating transfer: Amount: ${adjustedAmount}, To: ${toAddress}`);
-      const txnHash = await transferLegacyCoin(adjustedAmount, privateKey, toAddress);
+      const txnHash = await transferLegacyCoin(adjustedAmount, privateKey, toAddress, contractAddress);
       addDebugInfo(`Transaction successful with hash: ${txnHash}`);
       setTransactionHash(txnHash)
 
