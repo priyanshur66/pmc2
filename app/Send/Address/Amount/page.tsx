@@ -273,7 +273,7 @@ export default function EnterAmount(): JSX.Element {
             <span className="text-white ml-2">{symbol}</span>
           </div>
         </div>
-        <div className="text-gray-400">${amountUSD.toFixed(2)}</div>
+        {/* <div className="text-gray-400">${amountUSD.toFixed(2)}</div> */}
       </div>
       <div className="mb-6">
         <div className="h-px bg-[#CACACA] w-full mb-4"></div>

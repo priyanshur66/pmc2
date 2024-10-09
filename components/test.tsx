@@ -69,12 +69,21 @@ interface TabContentProps {
   activeTab: TabType;
 }
 
+interface TokenPrice {
+  [key: string]: number;
+}
+
+
+
+
+
 
 
 
 const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
   const [price, setPrice] = useState(null);
   const [pnl, setPnl] = useState(null);
+  const [tokenPrices, setTokenPrices] = useState<TokenPrice>({});
 
 
 
@@ -101,6 +110,35 @@ const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
 
     fetchPriceAndPnl();
   }, []);
+
+  // useEffect(() => {
+  //   const fetchTokenPrices = async () => {
+  //     const prices: TokenPrice = {};
+  //     for (const token of tokenBalances) {
+  //       try {
+  //         const response = await axios.get(
+  //           `https://api.coingecko.com/api/v3/simple/price`,
+  //           {
+  //             params: {
+  //               ids: token.symbol.toLowerCase(),
+  //               vs_currencies: 'usd',
+  //             },
+  //           }
+  //         );
+  //         if (response.data[token.symbol.toLowerCase()]) {
+  //           prices[token.symbol] = response.data[token.symbol.toLowerCase()].usd;
+  //         }
+  //       } catch (error) {
+  //         console.error(`Error fetching price for ${token.symbol}:`, error);
+  //       }
+  //     }
+  //     setTokenPrices(prices);
+  //   };
+
+  //   if (tokenBalances.length > 0) {
+  //     fetchTokenPrices();
+  //   }
+  // }, [tokenBalances]);
 
 
   if (activeTab === 'Tokens') {
@@ -170,30 +208,105 @@ const WalletScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [price, setPrice] = useState(null);
   const [pnl, setPnl] = useState(null);
+  const [aptPrice, setAptPrice] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchPriceAndPnl = async () => {
-      try {
-        const response = await axios.get(
-          'https://api.coingecko.com/api/v3/coins/markets',
-          {
-            params: {
-              vs_currency: 'usd',
-              ids: 'aptos',
-            },
-          }
-        );
+  // useEffect(() => {
+  //   const fetchPriceAndPnl = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         'https://api.coingecko.com/api/v3/coins/markets',
+  //         {
+  //           params: {
+  //             vs_currency: 'usd',
+  //             ids: 'aptos',
+  //           },
+  //         }
+  //       );
 
-        const coinData = response.data[0];
-        setPrice(coinData.current_price);
-        setPnl(coinData.price_change_percentage_24h);
-      } catch (error) {
-        console.error('Error fetching APT price and PnL:', error);
-      }
-    };
+  //       const coinData = response.data[0];
+  //       setPrice(coinData.current_price);
+  //       setPnl(coinData.price_change_percentage_24h);
+  //     } catch (error) {
+  //       console.error('Error fetching APT price and PnL:', error);
+  //     }
+  //   };
 
-    fetchPriceAndPnl();
-  }, []);
+  //   fetchPriceAndPnl();
+  // }, []);
+
+  // const fetchTokenBalances = async (publicKey: string) => {
+  //   const TokensCollectionurl = 'https://api.testnet.aptoslabs.com/v1/graphql';
+  //   const query = `
+  //     query MyQuery {
+  //       current_fungible_asset_balances(
+  //         where: {owner_address: {_eq: "${publicKey}"}, amount: {_gt: "0"}}
+  //       ) {
+  //         owner_address
+  //         amount
+  //         metadata {
+  //           asset_type
+  //           name
+  //           supply_v2
+  //           symbol
+  //           token_standard
+  //           decimals
+  //         }
+  //         token_standard
+  //       }
+  //     }
+  //   `;
+
+  //   try {
+  //     const response = await axios.post(TokensCollectionurl, { query });
+  //     const balances = response.data.data.current_fungible_asset_balances;
+  
+  //     const tempArray: TokenBalance[] = [];
+  //     let totalBalance = 0;
+
+  
+  //     for (const balance of balances) {
+  //       const tokenDecimals = balance.metadata.decimals;
+  //       const tokenBalance = balance.amount;
+  //       const tokenName = balance.metadata.name;
+  //       const tokenContractAddress = balance.metadata.asset_type;
+  //       const tokenStandard = balance.token_standard;
+  //       const formattedTokenBalance = tokenBalance / (10 ** tokenDecimals);
+  //       const tokenSymbol = balance.metadata.symbol;
+  
+  //       if (tokenStandard === 'v1' && !tokenName.includes('LP')) {
+  //         tempArray.push({
+  //           name: tokenName,
+  //           balance: formattedTokenBalance,
+  //           contractAddress: tokenContractAddress,
+  //           standard: tokenStandard,
+  //           symbol: tokenSymbol
+
+  //         });
+  //         totalBalance += formattedTokenBalance;
+
+  //       } else if (tokenStandard === 'v2') {
+  //         tempArray.push({
+  //           name: tokenName,
+  //           balance: formattedTokenBalance,
+  //           contractAddress: tokenContractAddress,
+  //           standard: tokenStandard,
+  //           symbol: tokenSymbol
+            
+
+  //         });
+  //         totalBalance += formattedTokenBalance;
+
+  //       }
+  //     }
+  
+  //     setTokenBalances(tempArray);
+  //     setTotalBalance(totalBalance);
+  //     setCurrentBalance(totalBalance);
+
+  //   } catch (error) {
+  //     console.error('Error fetching token balances:', error);
+  //   }
+  // }
 
   const fetchTokenBalances = async (publicKey: string) => {
     const TokensCollectionurl = 'https://api.testnet.aptoslabs.com/v1/graphql';
@@ -224,7 +337,6 @@ const WalletScreen = () => {
       const tempArray: TokenBalance[] = [];
       let totalBalance = 0;
 
-  
       for (const balance of balances) {
         const tokenDecimals = balance.metadata.decimals;
         const tokenBalance = balance.amount;
@@ -234,40 +346,56 @@ const WalletScreen = () => {
         const formattedTokenBalance = tokenBalance / (10 ** tokenDecimals);
         const tokenSymbol = balance.metadata.symbol;
   
-        if (tokenStandard === 'v1' && !tokenName.includes('LP')) {
+        if ((tokenStandard === 'v1' && !tokenName.includes('LP')) || tokenStandard === 'v2') {
           tempArray.push({
             name: tokenName,
             balance: formattedTokenBalance,
             contractAddress: tokenContractAddress,
             standard: tokenStandard,
             symbol: tokenSymbol
-
           });
-          totalBalance += formattedTokenBalance;
-
-        } else if (tokenStandard === 'v2') {
-          tempArray.push({
-            name: tokenName,
-            balance: formattedTokenBalance,
-            contractAddress: tokenContractAddress,
-            standard: tokenStandard,
-            symbol: tokenSymbol
-            
-
-          });
-          totalBalance += formattedTokenBalance;
-
+          if (tokenSymbol === 'APT' && aptPrice !== null) {
+            totalBalance += formattedTokenBalance * aptPrice;
+          } else {
+            totalBalance += formattedTokenBalance;
+          }
         }
       }
   
       setTokenBalances(tempArray);
       setTotalBalance(totalBalance);
       setCurrentBalance(totalBalance);
-
     } catch (error) {
       console.error('Error fetching token balances:', error);
     }
-  }
+  };
+
+  useEffect(() => {
+    const fetchAptPrice = async () => {
+      try {
+        const response = await axios.get(
+          'https://api.coingecko.com/api/v3/simple/price',
+          {
+            params: {
+              ids: 'aptos',
+              vs_currencies: 'usd',
+            },
+          }
+        );
+        setAptPrice(response.data.aptos.usd);
+      } catch (error) {
+        console.error('Error fetching APT price:', error);
+      }
+    };
+
+    fetchAptPrice();
+  }, []);
+
+  useEffect(() => {
+    if (data.length > 0 && data[0].publicKey) {
+      fetchTokenBalances(data[0].publicKey);
+    }
+  }, [data, aptPrice]);
 
   const generateAndSaveWallet = async (userId: string, username: string) => {
     try {
@@ -572,7 +700,7 @@ const WalletScreen = () => {
 
 
 
-{tokenBalances.length > 0 ? (
+{/* {tokenBalances.length > 0 ? (
   <div className="flex flex-col space-y-4">
     {tokenBalances.map((token, index) => (
       <div key={index} className="flex items-center justify-between">
@@ -609,7 +737,45 @@ const WalletScreen = () => {
   <p className="text-[#9F9F9F] text-base font-light text-center py-4">
     You don&apos;t have any tokens yet
   </p>
-)}
+)} */}
+
+{tokenBalances.length > 0 ? (
+            <div className="flex flex-col space-y-4">
+              {tokenBalances.map((token, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-10 h-10 bg-[url('../public/aptos.svg')] rounded-full"></div>
+                    <div className="grid-rows-2">
+                      <p className="font-semibold px-4 text-xl">{token.symbol}</p>
+                      {token.symbol === 'APT' && aptPrice !== null && (
+                        <p className="font-light px-4 text-s mt-1">
+                          ${aptPrice.toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-lg text-white font-medium">
+                      {token.balance.toFixed(2)} {token.symbol}
+                    </span>
+                    {token.symbol === 'APT' && aptPrice !== null ? (
+                      <p className="text-xl font-bold">
+                        ${(token.balance * aptPrice).toFixed(2)}
+                      </p>
+                    ) : (
+                      <p className="text-xl font-bold">
+                        {token.balance.toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[#9F9F9F] text-base font-light text-center py-4">
+              You don't have any tokens yet
+            </p>
+          )}
 
 
 
