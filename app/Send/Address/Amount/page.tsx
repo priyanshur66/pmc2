@@ -10,6 +10,7 @@ import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
 import { useCurrentBalance } from "@/store";
 import axios from "axios";
+import { useCurrentSymbol } from "@/store";
 
 const NODE_URL = 'https://fullnode.testnet.aptoslabs.com/v1';
 const aptosClient = new AptosClient(NODE_URL);
@@ -86,6 +87,8 @@ export default function EnterAmount(): JSX.Element {
   const router = useRouter();
   const { toKey } = useToKey();
   const toAddress = toKey;
+  const { currentSymbol } = useCurrentSymbol();
+  const symbol = currentSymbol;
 
   const [price, setPrice] = useState(null);
   const [pnl, setPnl] = useState(null);
@@ -263,7 +266,7 @@ export default function EnterAmount(): JSX.Element {
               placeholder="0"
               className="bg-transparent text-center w-[20%] outline-none"
             />
-            <span className="text-white ml-2">APT</span>
+            <span className="text-white ml-2">{symbol}</span>
           </div>
         </div>
         <div className="text-gray-400">${amountUSD.toFixed(2)}</div>

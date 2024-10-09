@@ -9,6 +9,7 @@ import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } 
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
 import { strict } from 'assert';
+import { useCurrentSymbol } from '@/store';
 
 
 interface UserData {
@@ -59,6 +60,8 @@ const TokenCard: React.FC<TokenCardProps> = ({
     const [data, setData] = useState<MyData[]>([]);
     const [userData, setUserData] = useState<UserData | null>(null);
     const router = useRouter();
+    const {currentSymbol, setCurrentSymbol} = useCurrentSymbol();
+
 
 
 
@@ -163,8 +166,12 @@ const TokenCard: React.FC<TokenCardProps> = ({
               symbol : tokenSymbol
 
             });
+            setCurrentSymbol(tokenSymbol)
+
           }
         }
+
+        
     
         setTokenBalances(tempArray);
       } catch (error) {

@@ -24,6 +24,10 @@ interface currentBalanceState {
   currentBalance: number;
   setCurrentBalance: (key: number) => void;
 }
+interface currentSymbolState {
+  currentSymbol: string;
+  setCurrentSymbol: (key: string) => void;
+}
 
 
 export const usePublicKey = create<PublicKeyState>()(
@@ -97,6 +101,18 @@ export const useCurrentBalance = create <currentBalanceState>()(
     (set) => ({
       currentBalance: parseFloat('') || 0,
       setCurrentBalance: (key) => set({currentBalance: key}),
+    }),
+    {
+      name: 'public-key-storage',
+      storage: createJSONStorage(()=>localStorage),
+    }
+  )
+);
+export const useCurrentSymbol = create <currentSymbolState>()(
+  persist(
+    (set) => ({
+      currentSymbol: '' ,
+      setCurrentSymbol: (key) => set({currentSymbol: key}),
     }),
     {
       name: 'public-key-storage',
