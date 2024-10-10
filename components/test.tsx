@@ -336,6 +336,8 @@ const WalletScreen = () => {
   
       const tempArray: TokenBalance[] = [];
       let totalBalance = 0;
+      let newTotalBalance = 0;
+
 
       for (const balance of balances) {
         const tokenDecimals = balance.metadata.decimals;
@@ -354,21 +356,32 @@ const WalletScreen = () => {
             standard: tokenStandard,
             symbol: tokenSymbol
           });
-          if (tokenSymbol === 'APT' && aptPrice !== null) {
-            totalBalance += formattedTokenBalance * aptPrice;
-          } else {
-            totalBalance += formattedTokenBalance;
-          }
+        //   if (tokenSymbol === 'APT' && aptPrice !== null) {
+        //     totalBalance += formattedTokenBalance * aptPrice;
+        //   } else {
+        //     totalBalance += formattedTokenBalance;
+        //   }
+        // }
+
+        if (tokenSymbol === 'APT' && aptPrice !== null) {
+          newTotalBalance += formattedTokenBalance * aptPrice;
+        } else {
+          newTotalBalance += formattedTokenBalance;
         }
       }
   
+      // setTokenBalances(tempArray);
+      // setTotalBalance(totalBalance);
+      // setCurrentBalance(totalBalance);
+
       setTokenBalances(tempArray);
-      setTotalBalance(totalBalance);
-      setCurrentBalance(totalBalance);
-    } catch (error) {
-      console.error('Error fetching token balances:', error);
-    }
-  };
+      setTotalBalance(newTotalBalance);
+      setCurrentBalance(newTotalBalance);
+    } 
+  } catch (error) {
+    console.error('Error fetching token balances:', error);
+  }
+};
 
   useEffect(() => {
     const fetchAptPrice = async () => {
@@ -587,7 +600,9 @@ const WalletScreen = () => {
           <div>
             <span className="text-xl text-green-400">Main Balance</span>
             <h2 className="text-4xl mt-1 font-semibold"> $
-            {isBalanceVisible ? (totalBalance * (price || 0)).toFixed(3) : '*****'}
+            {/* {isBalanceVisible ? (totalBalance * (price || 0)).toFixed(3) : '*****'} */}
+            ${isBalanceVisible ? totalBalance.toFixed(3) : '*****'}
+
             </h2>
           </div>
           <img src="/eye.svg" alt="" className="h-6 w-6"
