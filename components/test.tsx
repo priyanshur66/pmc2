@@ -365,8 +365,6 @@ const WalletScreen = () => {
 
         if (tokenSymbol === 'APT' && aptPrice !== null) {
           newTotalBalance += formattedTokenBalance * aptPrice;
-        } else {
-          newTotalBalance += formattedTokenBalance;
         }
       }
   
@@ -601,7 +599,7 @@ const WalletScreen = () => {
             <span className="text-xl text-green-400">Main Balance</span>
             <h2 className="text-4xl mt-1 font-semibold"> $
             {/* {isBalanceVisible ? (totalBalance * (price || 0)).toFixed(3) : '*****'} */}
-            ${isBalanceVisible ? totalBalance.toFixed(3) : '*****'}
+            {isBalanceVisible ? totalBalance.toFixed(3) : '*****'}
 
             </h2>
           </div>
