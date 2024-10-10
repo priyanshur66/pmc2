@@ -596,7 +596,7 @@ const WalletScreen = () => {
       <div className="px-4 mb-4 space-x-4">
         <div className="bg-[#323030]/40 p-6 mx-4 rounded-xl flex justify-between items-center">
           <div>
-            <span className="text-xl text-green-400">Main Balance</span>
+            <span className="text-xl text-green-400">Main Balances</span>
             <h2 className="text-4xl mt-1 font-semibold"> $
             {/* {isBalanceVisible ? (totalBalance * (price || 0)).toFixed(3) : '*****'} */}
             {isBalanceVisible ? currentBalance.toFixed(3) : '*****'}
