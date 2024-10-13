@@ -477,12 +477,12 @@ const WalletScreen: React.FC = () => {
               </div>
             ) : (
               <p className="text-[#9F9F9F] text-base font-light text-center py-4">
-                You don't have any tokens yet
+                You don&apos;t have any tokens yet
               </p>
             )
           ) : (
             <p className="text-[#9F9F9F] text-base font-light text-center py-4">
-              You don't have any NFTs yet
+              You don&apos;t have any NFTs yet
             </p>
           )}
         </div>
