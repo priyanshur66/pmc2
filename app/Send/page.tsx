@@ -206,11 +206,11 @@ const TokenCard: React.FC<TokenCardProps> = ({
       >
           {/* <a href='/Send/Address'> */}
         <div className="flex items-center">
-          {/* <img
-            src={iconSrc}
+          <img
+            src="/aptos.svg"
             alt=""
             className="w-12 h-12 rounded-full mr-4"
-          /> */}
+          />
 
           <div >
             <h2 className="text-lg font-bold">
