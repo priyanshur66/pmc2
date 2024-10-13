@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from "react-feather";
 import { useState, useEffect } from 'react';
 import { format } from "date-fns";
+import { usePublicKey } from '@/store';
 
 interface Transaction {
   version: string;
@@ -37,7 +38,8 @@ const RecentActivity = () => {
   const [error, setError] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
 
-  const address = "0xbb629c088b696f8c3500d0133692a1ad98a90baef9d957056ec4067523181e9a";
+  const { publicKey } = usePublicKey();
+  const address = publicKey;
 
   const fetchTransactions = async (cursor: string | null = null) => {
     try {
