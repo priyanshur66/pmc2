@@ -310,26 +310,31 @@ const WalletScreen: React.FC = () => {
   const fetchNFTBalances = async (publicKey: string): Promise<NFTBalance[]> => {
     const NFTsCollectionUrl = 'https://api.testnet.aptoslabs.com/v1/graphql';
     const query = `
-      query MyQuery {
-        current_token_ownerships_v2(
-          where: {owner_address: {_eq: "${publicKey}"}, amount: {_gt: "0"}}
-        ) {
-          token_standard
-          token_data_id
-          property_version_v1
-          owner_address
-          is_soulbound_v2
-          amount
-          current_token_data {
-            collection_id
-            token_data_id
-            token_name
-            current_collection {
-              collection_name
-            }
-          }
+query MyQuery {
+  current_token_ownerships_v2(
+    where: {owner_address: {_eq: "${publicKey}"}, amount: {_gt: "0"}}
+  ) {
+    token_standard
+    token_data_id
+    property_version_v1
+    owner_address
+    is_soulbound_v2
+    amount
+    current_token_data {
+      collection_id
+      token_data_id
+      token_name
+      current_collection {
+        collection_name
+        cdn_asset_uris {
+          asset_uri
+          cdn_image_uri
+          raw_image_uri
         }
       }
+    }
+  }
+}
     `;
   
     try {
@@ -568,7 +573,11 @@ const WalletScreen: React.FC = () => {
           ) : nftBalances.length > 0 ? (
             <div className="flex flex-col space-y-4">
               {nftBalances.map((nft, index) => (
-                <div key={index} className="flex items-center justify-between">
+                  <Link 
+                  href={`/nft/${encodeURIComponent(nft.tokenDataId)}`} 
+                  key={index}
+                >
+                <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <div className="w-10 h-10 bg-[#323232] rounded-full flex items-center justify-center">
                       <span className="text-xs">NFT</span>
@@ -589,6 +598,7 @@ const WalletScreen: React.FC = () => {
                     )}
                   </div>
                 </div>
+                </Link>
               ))}
             </div>
           ) : (
