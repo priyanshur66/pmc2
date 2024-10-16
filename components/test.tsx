@@ -56,6 +56,17 @@ interface MyData {
   encryptedData: string;
 }
 
+interface NFTBalance {
+  tokenStandard: string;
+  tokenDataId: string;
+  propertyVersionV1: string;
+  ownerAddress: string;
+  isSoulboundV2: boolean;
+  amount: string;
+  tokenName: string;
+  collectionName: string;
+}
+
 type TabType = 'Tokens' | 'NFTs';
 
 const WalletScreen: React.FC = () => {
@@ -75,6 +86,10 @@ const WalletScreen: React.FC = () => {
   const [price, setPrice] = useState(null);
   const [pnl, setPnl] = useState(null);
   const [aptPrice, setAptPrice] = useState<number | null>(null);
+  const [nftBalances, setNftBalances] = useState<NFTBalance[]>([]);
+  const [isLoadingNFTs, setIsLoadingNFTs] = useState(false);
+
+
 
   function encrypt(text: string) {
     const cipher = crypto.createCipheriv(algorithm, key, iv);
@@ -291,6 +306,72 @@ const WalletScreen: React.FC = () => {
     console.log('Active tab changed:', activeTab);
   }, [activeTab]);
 
+
+  const fetchNFTBalances = async (publicKey: string): Promise<NFTBalance[]> => {
+    const NFTsCollectionUrl = 'https://api.testnet.aptoslabs.com/v1/graphql';
+    const query = `
+      query MyQuery {
+        current_token_ownerships_v2(
+          where: {owner_address: {_eq: "${publicKey}"}, amount: {_gt: "0"}}
+        ) {
+          token_standard
+          token_data_id
+          property_version_v1
+          owner_address
+          is_soulbound_v2
+          amount
+          current_token_data {
+            collection_id
+            token_data_id
+            token_name
+            current_collection {
+              collection_name
+            }
+          }
+        }
+      }
+    `;
+  
+    try {
+      const response = await axios.post(NFTsCollectionUrl, { query });
+      const nftOwnerships = response.data.data.current_token_ownerships_v2;
+  
+      const nftBalances: NFTBalance[] = nftOwnerships.map((ownership: any) => ({
+        tokenStandard: ownership.token_standard,
+        tokenDataId: ownership.token_data_id,
+        propertyVersionV1: ownership.property_version_v1,
+        ownerAddress: ownership.owner_address,
+        isSoulboundV2: ownership.is_soulbound_v2,
+        amount: ownership.amount,
+        tokenName: ownership.current_token_data.token_name,
+        collectionName: ownership.current_token_data.current_collection.collection_name
+      }));
+  
+      return nftBalances;
+    } catch (error) {
+      console.error('Error fetching NFT balances:', error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    const fetchNFTs = async () => {
+      if (activeTab === 'NFTs' && data.length > 0 && data[0].publicKey) {
+        setIsLoadingNFTs(true);
+        try {
+          const nfts = await fetchNFTBalances(data[0].publicKey);
+          setNftBalances(nfts);
+        } catch (error) {
+          console.error('Error fetching NFTs:', error);
+        } finally {
+          setIsLoadingNFTs(false);
+        }
+      }
+    };
+
+    fetchNFTs();
+  }, [activeTab, data]);
+
   return (
     <div>
     <div>
@@ -480,6 +561,36 @@ const WalletScreen: React.FC = () => {
                 You don&apos;t have any tokens yet
               </p>
             )
+          ) : isLoadingNFTs ? (
+            <p className="text-[#9F9F9F] text-base font-light text-center py-4">
+              Loading NFTs...
+            </p>
+          ) : nftBalances.length > 0 ? (
+            <div className="flex flex-col space-y-4">
+              {nftBalances.map((nft, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-10 h-10 bg-[#323232] rounded-full flex items-center justify-center">
+                      <span className="text-xs">NFT</span>
+                    </div>
+                    <div className="grid-rows-2">
+                      <p className="font-semibold px-4 text-xl">{nft.tokenName}</p>
+                      <p className="font-light px-4 text-s mt-1">
+                        {nft.collectionName}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-lg text-white font-medium">
+                      Qty: {nft.amount}
+                    </span>
+                    {nft.isSoulboundV2 && (
+                      <p className="text-sm text-[#F4A100]">Soulbound</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <p className="text-[#9F9F9F] text-base font-light text-center py-4">
               You don&apos;t have any NFTs yet
