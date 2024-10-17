@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, ChangeEvent } from 'react';
 import { ArrowLeft } from 'react-feather';
 import { useRouter } from 'next/navigation';
