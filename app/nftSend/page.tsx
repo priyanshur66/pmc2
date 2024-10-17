@@ -7,6 +7,30 @@ import { useNftImage } from '@/store';
 import { AptosClient, AptosAccount, TxnBuilderTypes, HexString } from 'aptos';
 import { useSelectedNFT } from '@/store';
 import { useTransactionHash, useIvData, useEncryptedValue } from '@/store';
+import { useEffect } from 'react';
+import WebApp from "@twa-dev/sdk";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+
+import db from "@/firebaseConfig";
+
+interface UserData {
+    id: number;
+    first_name: string;
+    last_name?: string;
+    username?: string;
+    language_code: string;
+    is_premium?: boolean;
+  }
+  
+  interface MyData {
+    id: string;
+    publicKey: string;
+    userName: number;
+    iv: string;
+    referralLink: string;
+    referredBy: string;
+    encryptedData: string;
+  }
 
 const NODE_URL = 'https://fullnode.testnet.aptoslabs.com/v1';
 const aptosClient = new AptosClient(NODE_URL);
@@ -56,6 +80,9 @@ export default function SendNFT() {
   const [privateKey, setPrivateKey] = useState<Uint8Array | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { transactionHash, setTransactionHash } = useTransactionHash();
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [data, setData] = useState<MyData[]>([]);
+
 
 
 
@@ -64,15 +91,63 @@ export default function SendNFT() {
   const toAddress = address;
   const { selectedNFT } = useSelectedNFT();
   const nftAddress = selectedNFT;
-  const { ivData } = useIvData();
-  const iv = ivData;
-  const { encryptedValue } = useEncryptedValue();
-  const encryptedData = encryptedValue;
+
   
-  const decryptedPrivateKey = decryptPrivateKey(encryptedData, iv, key);
 
-  setPrivateKey(HexString.ensure(decryptedPrivateKey).toUint8Array());
 
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && WebApp.initDataUnsafe.user) {
+      setUserData(WebApp.initDataUnsafe.user as UserData);
+    //   addDebugInfo(`User data set: ${JSON.stringify(WebApp.initDataUnsafe.user)}`);
+    } else {
+    //   addDebugInfo('WebApp.initDataUnsafe.user not available');
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (userData?.id) {
+        //   addDebugInfo(`Fetching data for user ID: ${userData.id}`);
+          const querySnapshot = await getDocs(collection(db, "testWalletUsers"));
+          const matchedData = querySnapshot.docs
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+            .filter((doc) => doc.id === String(userData.id)) as MyData[];
+          
+          setData(matchedData);
+        //   addDebugInfo(`Matched data: ${JSON.stringify(matchedData)}`);
+
+          if (matchedData.length > 0) {
+            const { iv, encryptedData } = matchedData[0];
+            
+            if (!iv || !encryptedData) {
+            //   addDebugInfo('IV or encryptedData is missing');
+              return;
+            }
+
+            // addDebugInfo(`IV: ${iv}`);
+            // addDebugInfo(`Encrypted Data: ${encryptedData}`);
+
+            const decryptedPrivateKey = decryptPrivateKey(encryptedData, iv, key);
+            // addDebugInfo(`Decrypted Private Key: ${decryptedPrivateKey}`);
+
+            setPrivateKey(HexString.ensure(decryptedPrivateKey).toUint8Array());
+            // addDebugInfo('Private key set successfully');
+          } else {
+            // addDebugInfo('No matching data found for user');
+          }
+        }
+      } catch (error) {
+        // addDebugInfo(`Error fetching data: ${error}`);
+      }
+    };
+
+    fetchData();
+  }, [userData]);
 
   
   const handleAddressChange = (value: string): void => {
