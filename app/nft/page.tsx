@@ -33,10 +33,14 @@ export default function NFTDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchNFTDetails = async () => {
-      if (!params.id) return;
+      if (!params.id) {
+        setIsLoading(false);
+        return;
+      }
       
-      setIsLoading(true);
       try {
         const tokenDataId = decodeURIComponent(params.id as string);
         const query = `
@@ -77,30 +81,38 @@ export default function NFTDetailPage() {
         const nftDetails = response.data.data.current_token_ownerships_v2[0];
         if (!nftDetails) throw new Error('NFT not found');
 
-        setNftData({
-          tokenName: nftDetails.current_token_data.token_name,
-          collectionName: nftDetails.current_token_data.current_collection.collection_name,
-          amount: nftDetails.amount,
-          tokenDataId: nftDetails.token_data_id,
-          ownerAddress: nftDetails.owner_address,
-          isSoulboundV2: nftDetails.is_soulbound_v2,
-          tokenStandard: nftDetails.token_standard,
-          description: nftDetails.current_token_data.description,
-          attributes: nftDetails.current_token_data.token_properties,
-          current_token_data: {
-            current_collection: {
-              cdn_asset_uris: nftDetails.current_token_data.current_collection.cdn_asset_uris
+        if (mounted) {
+          setNftData({
+            tokenName: nftDetails.current_token_data.token_name,
+            collectionName: nftDetails.current_token_data.current_collection.collection_name,
+            amount: nftDetails.amount,
+            tokenDataId: nftDetails.token_data_id,
+            ownerAddress: nftDetails.owner_address,
+            isSoulboundV2: nftDetails.is_soulbound_v2,
+            tokenStandard: nftDetails.token_standard,
+            description: nftDetails.current_token_data.description,
+            attributes: nftDetails.current_token_data.token_properties,
+            current_token_data: {
+              current_collection: {
+                cdn_asset_uris: nftDetails.current_token_data.current_collection.cdn_asset_uris
+              }
             }
-          }
-        });
+          });
+          setIsLoading(false);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch NFT details');
-      } finally {
-        setIsLoading(false);
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'Failed to fetch NFT details');
+          setIsLoading(false);
+        }
       }
     };
 
     fetchNFTDetails();
+
+    return () => {
+      mounted = false;
+    };
   }, [params.id]);
 
   const handleCopy = (text: string, type: 'Address' | 'Token ID') => {
@@ -151,7 +163,6 @@ export default function NFTDetailPage() {
     <div className="min-h-screen bg-gradient-to-b from-[#F33439]/25 to-[#0F0F0F]">
       <ToastContainer position="top-right" theme="dark" />
       
-      {/* Header */}
       <div className="p-4 flex items-center">
         <Link href="/wallet" className="mr-4">
           <ArrowLeft className="h-6 w-6" />
@@ -159,9 +170,7 @@ export default function NFTDetailPage() {
         <h1 className="text-xl font-semibold">NFT Details</h1>
       </div>
 
-      {/* NFT Display */}
       <div className="p-4 space-y-4">
-        {/* Main NFT Card */}
         <div className="bg-[#323232]/40 rounded-2xl p-6">
           {nftData.current_token_data?.current_collection?.cdn_asset_uris?.cdn_image_uri ? (
             <div className="h-64 rounded-xl overflow-hidden mb-4">
@@ -193,7 +202,6 @@ export default function NFTDetailPage() {
           )}
         </div>
 
-        {/* Properties */}
         {nftData.attributes && Object.keys(nftData.attributes).length > 0 && (
           <div className="bg-[#323232]/40 rounded-2xl p-6">
             <h3 className="text-lg font-semibold mb-4">Properties</h3>
@@ -211,7 +219,6 @@ export default function NFTDetailPage() {
           </div>
         )}
 
-        {/* Details */}
         <div className="bg-[#323232]/40 rounded-2xl p-6">
           <h3 className="text-lg font-semibold mb-4">Details</h3>
           
