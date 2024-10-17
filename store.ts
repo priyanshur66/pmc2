@@ -32,6 +32,10 @@ interface selectedTokenState {
   selectedToken: string;
   setSelectedToken: (key: string) => void;
 }
+interface selectedNFTState {
+  selectedNFT: string;
+  setSelectedNFT: (key: string) => void;
+}
 
 
 export const usePublicKey = create<PublicKeyState>()(
@@ -130,6 +134,18 @@ export const useSelectedToken = create <selectedTokenState>()(
     (set) => ({
       selectedToken: '' ,
       setSelectedToken: (key) => set({selectedToken: key}),
+    }),
+    {
+      name: 'public-key-storage',
+      storage: createJSONStorage(()=>localStorage),
+    }
+  )
+);
+export const useSelectedNFT = create <selectedNFTState>()(
+  persist(
+    (set) => ({
+      selectedNFT: '' ,
+      setSelectedNFT: (key) => set({selectedNFT: key}),
     }),
     {
       name: 'public-key-storage',

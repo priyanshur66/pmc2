@@ -4,6 +4,8 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
 import { ArrowLeft } from 'lucide-react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface NFTMetadata {
   tokenName: string;
@@ -14,10 +16,14 @@ interface NFTMetadata {
   isSoulboundV2: boolean;
   tokenStandard: string;
   description?: string;
-  attributes?: Array<{
-    trait_type: string;
-    value: string;
-  }>;
+  attributes?: { [key: string]: string | number };
+  current_token_data?: {
+    current_collection?: {
+      cdn_asset_uris?: {
+        cdn_image_uri?: string;
+      };
+    };
+  };
 }
 
 export default function NFTDetailPage() {
@@ -80,7 +86,12 @@ export default function NFTDetailPage() {
           isSoulboundV2: nftDetails.is_soulbound_v2,
           tokenStandard: nftDetails.token_standard,
           description: nftDetails.current_token_data.description,
-          attributes: nftDetails.current_token_data.token_properties
+          attributes: nftDetails.current_token_data.token_properties,
+          current_token_data: {
+            current_collection: {
+              cdn_asset_uris: nftDetails.current_token_data.current_collection.cdn_asset_uris
+            }
+          }
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch NFT details');
@@ -91,6 +102,20 @@ export default function NFTDetailPage() {
 
     fetchNFTDetails();
   }, [params.id]);
+
+  const handleCopy = (text: string, type: 'Address' | 'Token ID') => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${type} copied to clipboard!`, {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
+  };
 
   if (isLoading) {
     return (
@@ -124,6 +149,8 @@ export default function NFTDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F33439]/25 to-[#0F0F0F]">
+      <ToastContainer position="top-right" theme="dark" />
+      
       {/* Header */}
       <div className="p-4 flex items-center">
         <Link href="/wallet" className="mr-4">
@@ -136,28 +163,48 @@ export default function NFTDetailPage() {
       <div className="p-4 space-y-4">
         {/* Main NFT Card */}
         <div className="bg-[#323232]/40 rounded-2xl p-6">
-          <div className="h-64 bg-[#424242] rounded-xl flex items-center justify-center mb-4">
-            <span className="text-2xl">NFT</span>
+          {nftData.current_token_data?.current_collection?.cdn_asset_uris?.cdn_image_uri ? (
+            <div className="h-64 rounded-xl overflow-hidden mb-4">
+              <img 
+                src={nftData.current_token_data.current_collection.cdn_asset_uris.cdn_image_uri} 
+                alt={nftData.tokenName}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="h-64 bg-[#424242] rounded-xl flex items-center justify-center mb-4">
+              <span className="text-2xl">NFT</span>
+            </div>
+          )}
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-2xl font-bold">{nftData.tokenName}</h2>
+              <p className="text-gray-400">{nftData.collectionName}</p>
+            </div>
+            <div className="flex flex-col items-end">
+              <span className="text-sm text-gray-400">Quantity</span>
+              <span className="text-lg font-semibold">{nftData.amount}</span>
+            </div>
           </div>
-          <h2 className="text-2xl font-bold mb-2">{nftData.tokenName}</h2>
-          <p className="text-gray-400">{nftData.collectionName}</p>
           {nftData.description && (
-            <p className="mt-4 text-gray-300">{nftData.description}</p>
+            <p className="mt-4 text-gray-300 text-sm leading-relaxed">
+              {nftData.description}
+            </p>
           )}
         </div>
 
         {/* Properties */}
-        {nftData.attributes && nftData.attributes.length > 0 && (
+        {nftData.attributes && Object.keys(nftData.attributes).length > 0 && (
           <div className="bg-[#323232]/40 rounded-2xl p-6">
             <h3 className="text-lg font-semibold mb-4">Properties</h3>
             <div className="grid grid-cols-2 gap-4">
-              {nftData.attributes.map((attr, index) => (
+              {Object.entries(nftData.attributes).map(([key, value], index) => (
                 <div 
                   key={index}
                   className="bg-[#424242] rounded-lg p-3"
                 >
-                  <p className="text-gray-400 text-sm">{attr.trait_type}</p>
-                  <p className="font-medium">{attr.value}</p>
+                  <p className="text-gray-400 text-sm">{key}</p>
+                  <p className="font-medium">{String(value)}</p>
                 </div>
               ))}
             </div>
@@ -175,17 +222,14 @@ export default function NFTDetailPage() {
             </div>
             
             <div className="flex justify-between items-center">
-              <span className="text-gray-400">Amount</span>
-              <span>{nftData.amount}</span>
-            </div>
-            
-            <div className="flex justify-between items-center">
               <span className="text-gray-400">Token ID</span>
               <div className="flex items-center">
-                <span className="text-sm">{`${nftData.tokenDataId.slice(0, 6)}...${nftData.tokenDataId.slice(-4)}`}</span>
+                <span className="text-sm font-mono">
+                  {`${nftData.tokenDataId.slice(0, 6)}...${nftData.tokenDataId.slice(-4)}`}
+                </span>
                 <button 
-                  onClick={() => navigator.clipboard.writeText(nftData.tokenDataId)}
-                  className="ml-2 p-1 hover:bg-[#424242] rounded-full"
+                  onClick={() => handleCopy(nftData.tokenDataId, 'Token ID')}
+                  className="ml-2 p-1 hover:bg-[#424242] rounded-full transition-colors"
                 >
                   <img src="/copy.svg" alt="Copy" className="w-4 h-4" />
                 </button>
@@ -195,10 +239,12 @@ export default function NFTDetailPage() {
             <div className="flex justify-between items-center">
               <span className="text-gray-400">Owner</span>
               <div className="flex items-center">
-                <span className="text-sm">{`${nftData.ownerAddress.slice(0, 6)}...${nftData.ownerAddress.slice(-4)}`}</span>
+                <span className="text-sm font-mono">
+                  {`${nftData.ownerAddress.slice(0, 6)}...${nftData.ownerAddress.slice(-4)}`}
+                </span>
                 <button 
-                  onClick={() => navigator.clipboard.writeText(nftData.ownerAddress)}
-                  className="ml-2 p-1 hover:bg-[#424242] rounded-full"
+                  onClick={() => handleCopy(nftData.ownerAddress, 'Address')}
+                  className="ml-2 p-1 hover:bg-[#424242] rounded-full transition-colors"
                 >
                   <img src="/copy.svg" alt="Copy" className="w-4 h-4" />
                 </button>
@@ -208,7 +254,7 @@ export default function NFTDetailPage() {
             {nftData.isSoulboundV2 && (
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Type</span>
-                <span className="text-[#F4A100]">Soulbound</span>
+                <span className="text-[#F4A100] font-medium">Soulbound</span>
               </div>
             )}
           </div>

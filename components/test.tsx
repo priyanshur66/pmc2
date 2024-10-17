@@ -19,6 +19,8 @@ import {
   AptosConfig,
   Network,
 } from "@aptos-labs/ts-sdk";
+import { useSelectedNFT } from "@/store";
+import { useRouter } from "next/navigation";
 
 const aptosConfig = new AptosConfig({ network: Network.TESTNET });
 export const aptos = new Aptos(aptosConfig);
@@ -88,6 +90,10 @@ const WalletScreen: React.FC = () => {
   const [aptPrice, setAptPrice] = useState<number | null>(null);
   const [nftBalances, setNftBalances] = useState<NFTBalance[]>([]);
   const [isLoadingNFTs, setIsLoadingNFTs] = useState(false);
+  const {setSelectedNFT} = useSelectedNFT();
+  const router = useRouter();
+
+
 
 
 
@@ -154,7 +160,8 @@ const WalletScreen: React.FC = () => {
       setTokenBalances(tempArray);
       setTotalBalance(newTotalBalance);
       setCurrentBalance(newTotalBalance);
-    } catch (error) {
+    }
+     catch (error) {
       console.error('Error fetching token balances:', error);
     }
   };
@@ -358,6 +365,7 @@ query MyQuery {
       return [];
     }
   };
+  
 
   useEffect(() => {
     const fetchNFTs = async () => {
@@ -376,6 +384,13 @@ query MyQuery {
 
     fetchNFTs();
   }, [activeTab, data]);
+
+  const handleNFTClick = (tokenDataId: string) => {
+    // setCurrentSymbol(tokenSymbol)
+    // setSelectedToken(contractAddress)
+    setSelectedNFT(tokenDataId)
+    router.push(`/nft?tokenDataId=${encodeURIComponent(tokenDataId)}`);
+  };
 
   return (
     <div>
@@ -573,11 +588,10 @@ query MyQuery {
           ) : nftBalances.length > 0 ? (
             <div className="flex flex-col space-y-4">
               {nftBalances.map((nft, index) => (
-                  <Link 
-                  href={`/nft/${encodeURIComponent(nft.tokenDataId)}`} 
-                  key={index}
-                >
-                <div className="flex items-center justify-between">
+                
+                <div key={index} className="flex items-center justify-between"
+                onClick={() => handleNFTClick(nft.tokenDataId)}
+>
                   <div className="flex items-center space-x-2">
                     <div className="w-10 h-10 bg-[#323232] rounded-full flex items-center justify-center">
                       <span className="text-xs">NFT</span>
@@ -598,7 +612,7 @@ query MyQuery {
                     )}
                   </div>
                 </div>
-                </Link>
+                // </Link>
               ))}
             </div>
           ) : (

@@ -49,7 +49,7 @@ function decryptPrivateKey(encryptedData: string, iv: string, key: Buffer): stri
 const key = crypto.createHash('sha256').update('KEY_TEST').digest();
 
 
-async function transferLegacyCoin(amount: number, privateKey: Uint8Array, toAddress: string, contractAddress: string) {
+async function transferLegacyCoin(  amount: number, privateKey: Uint8Array, toAddress: string, contractAddress: string) {
   try {
     // const contractAddress = '0x1::aptos_coin::AptosCoin';
     const sender = new AptosAccount(privateKey);
