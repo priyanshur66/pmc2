@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import { useSelectedNFT } from "@/store";
 import "react-toastify/dist/ReactToastify.css";
+import { useNftImage } from "@/store";
 
 interface NFTMetadata {
   tokenName: string;
@@ -33,6 +34,9 @@ export default function NFTDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { selectedNFT } = useSelectedNFT();
+  // const [imageSource, setImageSource] = useState<string | null>(null);
+  const { setNftImage } = useNftImage();
+
 
   useEffect(() => {
     let mounted = true;
@@ -105,6 +109,10 @@ export default function NFTDetailPage() {
               },
             },
           });
+          setNftImage(
+            nftDetails.current_token_data.current_collection.cdn_asset_uris?.cdn_image_uri || null
+          );
+  
           setIsLoading(false);
         }
       } catch (err) {
