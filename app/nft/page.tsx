@@ -143,7 +143,7 @@ export default function NFTDetailPage() {
       <div className="min-h-screen bg-gradient-to-b from-[#F33439]/25 to-[#0F0F0F] flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-t-2 border-[#F4A100] border-solid rounded-full animate-spin mb-4 mx-auto"></div>
-          <p className="text-gray-400">Loading NFT details...</p>
+          <p className="text-white">Loading NFT details...</p>
         </div>
       </div>
     );
@@ -153,7 +153,7 @@ export default function NFTDetailPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#F33439]/25 to-[#0F0F0F] p-4">
         <div className="mb-4">
-          <Link href="/wallet" className="flex items-center text-gray-400">
+          <Link href="/wallet" className="flex items-center text-white">
             <ArrowLeft className="h-6 w-6 mr-2" />
             Back to Wallet
           </Link>
@@ -177,7 +177,15 @@ export default function NFTDetailPage() {
           <ArrowLeft className="h-6 w-6" />
         </Link>
         <h1 className="text-xl font-semibold">NFT Details</h1>
+
+        <div className="w-20 h-20 bg-[#323030]/40 border border-[#424242] shadow-lg shadow-[#F4A100]/15 rounded-full flex items-center justify-center">
+        <Link href="/nftSend">
+
+              <img src="/send.svg" alt="" />
+              </Link>
+            </div>
       </div>
+
 
       <div className="p-4 space-y-4">
         <div className="bg-[#323232]/40 rounded-2xl p-6">
@@ -201,10 +209,10 @@ export default function NFTDetailPage() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <h2 className="text-2xl font-bold">{nftData.tokenName}</h2>
-              <p className="text-gray-400">{nftData.collectionName}</p>
+              <p className="text-white">{nftData.collectionName}</p>
             </div>
             <div className="flex flex-col items-end">
-              <span className="text-sm text-gray-400">Quantity</span>
+              <span className="text-sm text-white">Quantity</span>
               <span className="text-lg font-semibold">{nftData.amount}</span>
             </div>
           </div>
@@ -221,7 +229,7 @@ export default function NFTDetailPage() {
             <div className="grid grid-cols-2 gap-4">
               {Object.entries(nftData.attributes).map(([key, value], index) => (
                 <div key={index} className="bg-[#424242] rounded-lg p-3">
-                  <p className="text-gray-400 text-sm">{key}</p>
+                  <p className="text-white text-sm">{key}</p>
                   <p className="font-medium">{String(value)}</p>
                 </div>
               ))}
@@ -234,12 +242,12 @@ export default function NFTDetailPage() {
 
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-400">Token Standard</span>
+              <span className="text-white">Token Standard</span>
               <span>{nftData.tokenStandard}</span>
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-gray-400">Token ID</span>
+              <span className="text-white">Token ID</span>
               <div className="flex items-center">
                 <span className="text-sm font-mono">
                   {`${nftData.tokenDataId.slice(
@@ -257,7 +265,7 @@ export default function NFTDetailPage() {
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-gray-400">Owner</span>
+              <span className="text-white">Owner</span>
               <div className="flex items-center">
                 <span className="text-sm font-mono">
                   {`${nftData.ownerAddress.slice(
@@ -276,7 +284,7 @@ export default function NFTDetailPage() {
 
             {nftData.isSoulboundV2 && (
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Type</span>
+                <span className="text-white">Type</span>
                 <span className="text-[#F4A100] font-medium">Soulbound</span>
               </div>
             )}
