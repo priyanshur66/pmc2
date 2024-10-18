@@ -587,8 +587,8 @@ query MyQuery {
               Loading NFTs...
             </p>
           ) : nftBalances.length > 0 ? (
-            <div className="flex flex-col space-y-4">
-              {nftBalances.map((nft, index) => (
+<div className="grid grid-cols-2 gap-4">
+{nftBalances.map((nft, index) => (
                 
 //                 <div key={index} className="flex items-center justify-between"
 //                 onClick={() => handleNFTClick(nft.tokenDataId)}
@@ -614,20 +614,19 @@ query MyQuery {
 //                   </div>
 //                 </div>
 
-<div  key={index}   onClick={() => handleNFTClick(nft.tokenDataId)} className="grid grid-cols-2 gap-4">
 <div 
+  key={index}   onClick={() => handleNFTClick(nft.tokenDataId)}
   className="p-4 rounded-lg relative aspect-square bg-cover bg-center bg-no-repeat"
   style={{ 
     backgroundImage: `url(${nft.cdnAssetUris  || ''})`,
     backgroundColor: '#1f2937' // fallback background color (gray-800)
   }}
 >
-  <div className="absolute inset-0 bg-black/30 rounded-lg" /> {/* Optional overlay for better text readability */}
-  <div className="relative z-10"> {/* Content wrapper to keep text above the overlay */}
+  <div className="absolute inset-0 bg-black/30 rounded-lg" />
+  <div className="relative z-10">
     <span className="text-lg font-medium">{nft.tokenName}</span>
   </div>
   
-</div>
 </div>
               ))}
             </div>
