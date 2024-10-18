@@ -8,7 +8,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { useSelectedNFT } from "@/store";
 import "react-toastify/dist/ReactToastify.css";
 import { useNftImage } from "@/store";
-
+import { useRouter } from "next/navigation";
 interface NFTMetadata {
   tokenName: string;
   collectionName: string;
@@ -34,6 +34,8 @@ export default function NFTDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { selectedNFT } = useSelectedNFT();
+  const router = useRouter();
+
   // const [imageSource, setImageSource] = useState<string | null>(null);
   const { setNftImage } = useNftImage();
 
@@ -159,16 +161,22 @@ export default function NFTDetailPage() {
 
   if (error || !nftData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#F33439]/25 to-[#0F0F0F] p-4">
-        <div className="mb-4">
-          <Link href="/wallet" className="flex items-center text-white">
-            <ArrowLeft className="h-6 w-6 mr-2" />
-            Back to Wallet
-          </Link>
-        </div>
+      <div className="min-h-screen bg-[#323030] p-4">
+         <div className="mb-4 flex items-center">
+      <button onClick={() => router.back()} className="text-white">
+          {/* Back Arrow Icon */}
+          <ArrowLeft className="mr-4" />
+
+        </button>
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 flex ">
+      <p className="text-white font-bold text-lg ">
+          Back to Wallet
+        </p>
+      </div>      
+      </div>
         <div className="bg-[#323232]/40 rounded-2xl p-6 text-center">
           <p className="text-red-400">{error || "NFT not found"}</p>
-          <Link href="/wallet" className="text-[#F4A100] mt-4 block">
+          <Link href="/" className="text-[#F4A100] mt-4 block">
             Return to wallet
           </Link>
         </div>

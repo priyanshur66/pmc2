@@ -67,6 +67,7 @@ interface NFTBalance {
   amount: string;
   tokenName: string;
   collectionName: string;
+  cdnAssetUris: string;
 }
 
 type TabType = 'Tokens' | 'NFTs';
@@ -356,7 +357,9 @@ query MyQuery {
         isSoulboundV2: ownership.is_soulbound_v2,
         amount: ownership.amount,
         tokenName: ownership.current_token_data.token_name,
-        collectionName: ownership.current_token_data.current_collection.collection_name
+        collectionName: ownership.current_token_data.current_collection.collection_name,
+        cdnAssetUris: ownership.current_token_data.current_collection.cdn_asset_uris.cdn_image_uri
+
       }));
   
       return nftBalances;
@@ -386,8 +389,6 @@ query MyQuery {
   }, [activeTab, data]);
 
   const handleNFTClick = (tokenDataId: string) => {
-    // setCurrentSymbol(tokenSymbol)
-    // setSelectedToken(contractAddress)
     setSelectedNFT(tokenDataId)
     router.push(`/nft?tokenDataId=${encodeURIComponent(tokenDataId)}`);
   };
@@ -589,30 +590,45 @@ query MyQuery {
             <div className="flex flex-col space-y-4">
               {nftBalances.map((nft, index) => (
                 
-                <div key={index} className="flex items-center justify-between"
-                onClick={() => handleNFTClick(nft.tokenDataId)}
+//                 <div key={index} className="flex items-center justify-between"
+//                 onClick={() => handleNFTClick(nft.tokenDataId)}
+// >
+//                   <div className="flex items-center space-x-2">
+//                     <div className="w-10 h-10 bg-[#323232] rounded-full flex items-center justify-center">
+//                       <span className="text-xs">NFT</span>
+//                     </div>
+//                     <div className="grid-rows-2">
+//                       <p className="font-semibold px-4 text-xl">{nft.tokenName}</p>
+//                       <p className="font-light px-4 text-s mt-1">
+//                         {nft.collectionName}
+//                       </p>
+//                     </div>
+//                   </div>
+//                   <div className="flex flex-col items-end">
+//                     <span className="text-lg text-white font-medium">
+//                       Qty: {nft.amount}
+//                     </span>
+//                     {nft.isSoulboundV2 && (
+//                       <p className="text-sm text-[#F4A100]">Soulbound</p>
+//                     )}
+//                   </div>
+//                 </div>
+
+<div  key={index}   onClick={() => handleNFTClick(nft.tokenDataId)} className="grid grid-cols-2 gap-4">
+<div 
+  className="p-4 rounded-lg relative aspect-square bg-cover bg-center bg-no-repeat"
+  style={{ 
+    backgroundImage: `url(${nft.cdnAssetUris  || ''})`,
+    backgroundColor: '#1f2937' // fallback background color (gray-800)
+  }}
 >
-                  <div className="flex items-center space-x-2">
-                    <div className="w-10 h-10 bg-[#323232] rounded-full flex items-center justify-center">
-                      <span className="text-xs">NFT</span>
-                    </div>
-                    <div className="grid-rows-2">
-                      <p className="font-semibold px-4 text-xl">{nft.tokenName}</p>
-                      <p className="font-light px-4 text-s mt-1">
-                        {nft.collectionName}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="text-lg text-white font-medium">
-                      Qty: {nft.amount}
-                    </span>
-                    {nft.isSoulboundV2 && (
-                      <p className="text-sm text-[#F4A100]">Soulbound</p>
-                    )}
-                  </div>
-                </div>
-                // </Link>
+  <div className="absolute inset-0 bg-black/30 rounded-lg" /> {/* Optional overlay for better text readability */}
+  <div className="relative z-10"> {/* Content wrapper to keep text above the overlay */}
+    <span className="text-lg font-medium">{nft.tokenName}</span>
+  </div>
+  
+</div>
+</div>
               ))}
             </div>
           ) : (
