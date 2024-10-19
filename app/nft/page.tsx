@@ -39,7 +39,6 @@ export default function NFTDetailPage() {
   // const [imageSource, setImageSource] = useState<string | null>(null);
   const { setNftImage } = useNftImage();
 
-
   useEffect(() => {
     let mounted = true;
 
@@ -112,9 +111,10 @@ export default function NFTDetailPage() {
             },
           });
           setNftImage(
-            nftDetails.current_token_data.current_collection.cdn_asset_uris?.cdn_image_uri || null
+            nftDetails.current_token_data.current_collection.cdn_asset_uris
+              ?.cdn_image_uri || null
           );
-  
+
           setIsLoading(false);
         }
       } catch (err) {
@@ -150,7 +150,7 @@ export default function NFTDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#F33439]/25 to-[#0F0F0F] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-[#F33439]/25 to-[#0F0F0F] inset-0 flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-t-2 border-[#F4A100] border-solid rounded-full animate-spin mb-4 mx-auto"></div>
           <p className="text-white">Loading NFT details...</p>
@@ -161,21 +161,20 @@ export default function NFTDetailPage() {
 
   if (error || !nftData) {
     return (
-      <div className="min-h-screen bg-[#323030] p-4">
-         <div className="mb-4 flex items-center">
-      <button onClick={() => router.back()} className="text-white">
-          {/* Back Arrow Icon */}
-          <ArrowLeft className="mr-4" />
-
-        </button>
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 flex ">
-      <p className="text-white font-bold text-lg ">
-          Back to Wallet
-        </p>
-      </div>      
-      </div>
-        <div className="bg-[#323232]/40 rounded-2xl p-6 text-center">
-          <p className="text-red-400">{error || "NFT not found"}</p>
+      <div className="min-h-screen bg-[#0F0F0F]">
+        <div className="mb-10 p-4 flex items-center bg-gradient-to-b from-[#F33439]/25 to-[#0F0F0F] inset-0">
+          <button onClick={() => router.back()} className="text-white">
+            {/* Back Arrow Icon */}
+            <ArrowLeft className="mr-4" />
+          </button>
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 flex ">
+            <p className="text-white font-bold text-lg">Back to Wallet</p>
+          </div>
+        </div>
+        <div className="box-background bg-[#4444444d]/10 rounded-2xl p-6 text-center m-4">
+          <p className="text-red-700 font-extrabold">
+            {error || "NFT not found"}
+          </p>
           <Link href="/" className="text-[#F4A100] mt-4 block">
             Return to wallet
           </Link>
@@ -185,26 +184,24 @@ export default function NFTDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F33439]/25 to-[#0F0F0F]">
+    <div className="min-h-screen bg-[#0F0F0F]">
       <ToastContainer position="top-right" theme="dark" />
 
-      <div className="p-4 flex items-center">
+      <div className="p-4 flex items-center justify-between bg-gradient-to-b from-[#F33439]/25 to-[#0F0F0F] inset-0">
         <Link href="/wallet" className="mr-4">
           <ArrowLeft className="h-6 w-6" />
         </Link>
-        <h1 className="text-xl font-semibold">NFT Details</h1>
+        <h1 className="text-xl font-bold text-white">NFT Details</h1>
 
-        <div className="w-20 h-20 bg-[#323030]/40 border border-[#424242] shadow-lg shadow-[#F4A100]/15 rounded-full flex items-center justify-center">
-        <Link href="/nftSend">
-
-              <img src="/send.svg" alt="" />
-              </Link>
-            </div>
+        <div className="w-14 h-14 sm:w-20 sm:h-20 bg-[#323030]/40 border border-[#424242] shadow-lg shadow-[#F4A100]/15 rounded-full flex items-center justify-center ml-4">
+          <Link href="/nftSend">
+            <img src="/send.svg" alt="" />
+          </Link>
+        </div>
       </div>
 
-
       <div className="p-4 space-y-4">
-        <div className="bg-[#323232]/40 rounded-2xl p-6">
+        <div className="box-background bg-[#4444444d]/10 rounded-2xl p-6">
           {nftData.current_token_data?.current_collection?.cdn_asset_uris
             ?.cdn_image_uri ? (
             <div className="h-64 rounded-xl overflow-hidden mb-4">
@@ -224,12 +221,16 @@ export default function NFTDetailPage() {
           )}
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h2 className="text-2xl font-bold">{nftData.tokenName}</h2>
+              <h2 className="text-2xl text-red-500 font-bold">
+                {nftData.tokenName}
+              </h2>
               <p className="text-white">{nftData.collectionName}</p>
             </div>
             <div className="flex flex-col items-end">
               <span className="text-sm text-white">Quantity</span>
-              <span className="text-lg font-semibold">{nftData.amount}</span>
+              <span className="text-lg font-semibold text-red-500">
+                {nftData.amount}
+              </span>
             </div>
           </div>
           {nftData.description && (
@@ -240,7 +241,7 @@ export default function NFTDetailPage() {
         </div>
 
         {nftData.attributes && Object.keys(nftData.attributes).length > 0 && (
-          <div className="bg-[#323232]/40 rounded-2xl p-6">
+          <div className="box-background bg-[#4444444d]/10 p-6">
             <h3 className="text-lg font-semibold mb-4">Properties</h3>
             <div className="grid grid-cols-2 gap-4">
               {Object.entries(nftData.attributes).map(([key, value], index) => (
@@ -253,19 +254,21 @@ export default function NFTDetailPage() {
           </div>
         )}
 
-        <div className="bg-[#323232]/40 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold mb-4">Details</h3>
+        <div className="box-background bg-[#4444444d]/10 p-6">
+          <h3 className="text-xl font-bold mb-4 text-red-500">Details</h3>
 
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-white">Token Standard</span>
-              <span>{nftData.tokenStandard}</span>
+              <span className="text-red-500 font-semibold text-xl">
+                {nftData.tokenStandard}
+              </span>
             </div>
 
             <div className="flex justify-between items-center">
               <span className="text-white">Token ID</span>
               <div className="flex items-center">
-                <span className="text-sm font-mono">
+                <span className="text-sm font-mono text-red-500">
                   {`${nftData.tokenDataId.slice(
                     0,
                     6
@@ -283,7 +286,7 @@ export default function NFTDetailPage() {
             <div className="flex justify-between items-center">
               <span className="text-white">Owner</span>
               <div className="flex items-center">
-                <span className="text-sm font-mono">
+                <span className="text-sm font-mono text-red-500">
                   {`${nftData.ownerAddress.slice(
                     0,
                     6

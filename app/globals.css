@@ -2,8 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-
 .pink__gradient {
-    background: linear-gradient(90deg, #f4c4f3 0%, #F33439 100%);
-    filter: blur(900px);
-  }
+  background: linear-gradient(90deg, #f4c4f3 0%, #f33439 100%);
+  filter: blur(900px);
+}
+
+.box-background {
+  border-radius: 1rem;
+  /* background: #4444444d; */
+  box-shadow: 4px 8px 4px 0px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(20px);
+}
