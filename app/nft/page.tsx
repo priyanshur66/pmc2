@@ -88,7 +88,7 @@ export default function NFTDetailPage() {
         );
 
         const nftDetails = response.data.data.current_token_ownerships_v2[0];
-        console.log("nft details are",nftDetails)
+        console.log("nft details are", nftDetails);
         if (!nftDetails) throw new Error("NFT not found");
 
         if (mounted) {
@@ -164,7 +164,7 @@ export default function NFTDetailPage() {
     return (
       <div className="min-h-screen bg-[#0F0F0F]">
         <div className="mb-10 p-4 flex items-center bg-gradient-to-b from-[#F33439]/25 to-[#0F0F0F] inset-0">
-          <button onClick={() => router.back()} className="text-white">
+          <button onClick={() => router.push("/")} className="text-white">
             {/* Back Arrow Icon */}
             <ArrowLeft className="mr-4" />
           </button>

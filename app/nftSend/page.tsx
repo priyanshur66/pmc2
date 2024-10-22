@@ -189,7 +189,7 @@ export default function SendNFT() {
       //   addDebugInfo(`Transaction successful with hash: ${txnHash}`);
       setTransactionHash(txnHash);
 
-      router.push("/Send/Address/Amount/Success");
+      router.push("/nftSend/Success");
     } catch (error) {
       //   addDebugInfo(`Transaction failed: ${error}`);
     } finally {

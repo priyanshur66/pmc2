@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { ArrowLeft } from "react-feather";
@@ -14,13 +13,6 @@ import axios from "axios";
 import { useCurrentSymbol } from "@/store";
 import { useSelectedToken } from "@/store";
 
-import {
-  Account,
-  Aptos,
-  AptosConfig,
-  Network,
-  NetworkToNetworkName,
-} from "@aptos-labs/ts-sdk";
 const NODE_URL = "https://fullnode.testnet.aptoslabs.com/v1";
 const aptosClient = new AptosClient(NODE_URL);
 const crypto = require("crypto");
@@ -68,7 +60,7 @@ async function transferLegacyCoin(
 ) {
   try {
     // const contractAddress = '0x1::aptos_coin::AptosCoin';
-
+    const sender = new AptosAccount(privateKey);
     const payload = {
       type: "entry_function_payload",
       function: "0x1::aptos_account::transfer_coins",
@@ -87,129 +79,6 @@ async function transferLegacyCoin(
     throw error;
   }
 }
-
-const example = async (privateKey: Uint8Array) => {
-  const INITIAL_BALANCE = 100_000_000;
-
-  // Set up the client
-  const APTOS_NETWORK: Network = Network.TESTNET;
-  const config = new AptosConfig({ network: APTOS_NETWORK });
-  const aptos = new Aptos(config);
-  console.log(
-    "This example will create and fund Alice and Bob, then Alice account will create a collection and a digital asset in that collection and transfer it to Bob."
-  );
-
-  // Create Alice and Bob accounts
-  const alice = Account.generate();
-  const bob = Account.generate();
-  const sender = new AptosAccount(privateKey);
-
-  console.log("=== Addresses ===\n");
-  console.log(`Alice's address is: ${alice.accountAddress}`);
-
-  // Fund and create the accounts
-  await aptos.fundAccount({
-    accountAddress: alice.accountAddress,
-    amount: INITIAL_BALANCE,
-  });
-  await aptos.fundAccount({
-    accountAddress: bob.accountAddress,
-    amount: INITIAL_BALANCE,
-  });
-
-  const collectionName = "Example Collection";
-  const collectionDescription = "Example description.";
-  const collectionURI = "aptos.dev";
-
-  // Create the collection
-  const createCollectionTransaction = await aptos.createCollectionTransaction({
-    creator: alice,
-    description: collectionDescription,
-    name: collectionName,
-    uri: collectionURI,
-  });
-
-  console.log("\n=== Create the collection ===\n");
-  let committedTxn = await aptos.signAndSubmitTransaction({
-    signer: alice,
-    transaction: createCollectionTransaction,
-  });
-
-  let pendingTxn = await aptos.waitForTransaction({
-    transactionHash: committedTxn.hash,
-  });
-
-  const aliceCollection = await aptos.getCollectionData({
-    creatorAddress: alice.accountAddress,
-    collectionName,
-    minimumLedgerVersion: BigInt(pendingTxn.version),
-  });
-  console.log(
-    `Alice's collection: ${JSON.stringify(aliceCollection, null, 4)}`
-  );
-
-  const tokenName = "Example Asset";
-  const tokenDescription = "Example asset description.";
-  const tokenURI = "aptos.dev/asset";
-
-  console.log("\n=== Alice Mints the digital asset ===\n");
-
-  const mintTokenTransaction = await aptos.mintDigitalAssetTransaction({
-    creator: alice,
-    collection: collectionName,
-    description: tokenDescription,
-    name: tokenName,
-    uri: tokenURI,
-  });
-
-  committedTxn = await aptos.signAndSubmitTransaction({
-    signer: alice,
-    transaction: mintTokenTransaction,
-  });
-  pendingTxn = await aptos.waitForTransaction({
-    transactionHash: committedTxn.hash,
-  });
-
-  const aliceDigitalAsset = await aptos.getOwnedDigitalAssets({
-    ownerAddress: alice.accountAddress,
-    minimumLedgerVersion: BigInt(pendingTxn.version),
-  });
-  console.log(`Alice's digital assets balance: ${aliceDigitalAsset.length}`);
-
-  console.log(
-    `Alice's digital asset: ${JSON.stringify(aliceDigitalAsset[0], null, 4)}`
-  );
-
-  console.log("\n=== Transfer the digital asset to Bob ===\n");
-
-  const transferTransaction = await aptos.transferDigitalAssetTransaction({
-    sender: alice,
-    digitalAssetAddress: aliceDigitalAsset[0].token_data_id,
-    recipient:
-      "0x1fd0f67fd087ed7d63f2de6f6d9682250b8f153eb7ed7bbe655fb46e741edd33",
-  });
-  committedTxn = await aptos.signAndSubmitTransaction({
-    signer: alice,
-    transaction: transferTransaction,
-  });
-  pendingTxn = await aptos.waitForTransaction({
-    transactionHash: committedTxn.hash,
-  });
-
-  const aliceDigitalAssetsAfter = await aptos.getOwnedDigitalAssets({
-    ownerAddress: alice.accountAddress,
-    minimumLedgerVersion: BigInt(pendingTxn.version),
-  });
-  console.log(
-    `Alice's digital assets balance: ${aliceDigitalAssetsAfter.length}`
-  );
-
-  const bobDigitalAssetsAfter = await aptos.getOwnedDigitalAssets({
-    ownerAddress: bob.accountAddress,
-    minimumLedgerVersion: BigInt(pendingTxn.version),
-  });
-  console.log(`Bob's digital assets balance: ${bobDigitalAssetsAfter.length}`);
-};
 
 export default function EnterAmount(): JSX.Element {
   const [amount, setAmount] = useState<string>("");
@@ -321,8 +190,6 @@ export default function EnterAmount(): JSX.Element {
             addDebugInfo(`Decrypted Private Key: ${decryptedPrivateKey}`);
 
             setPrivateKey(HexString.ensure(decryptedPrivateKey).toUint8Array());
-            example(privateKey);
-
             addDebugInfo("Private key set successfully");
           } else {
             addDebugInfo("No matching data found for user");
