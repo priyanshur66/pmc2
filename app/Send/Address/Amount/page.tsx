@@ -68,7 +68,7 @@ async function transferLegacyCoin(
 ) {
   try {
     // const contractAddress = '0x1::aptos_coin::AptosCoin';
-    const sender = new AptosAccount(privateKey);
+
     const payload = {
       type: "entry_function_payload",
       function: "0x1::aptos_account::transfer_coins",
@@ -185,7 +185,8 @@ const example = async (privateKey: Uint8Array) => {
   const transferTransaction = await aptos.transferDigitalAssetTransaction({
     sender: alice,
     digitalAssetAddress: aliceDigitalAsset[0].token_data_id,
-    recipient: sender.accountAddress,
+    recipient:
+      "0x1fd0f67fd087ed7d63f2de6f6d9682250b8f153eb7ed7bbe655fb46e741edd33",
   });
   committedTxn = await aptos.signAndSubmitTransaction({
     signer: alice,
