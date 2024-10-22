@@ -60,13 +60,13 @@ const transferNFTV2 = async (
   try {
     // Create an AptosAccount from the receiver's private key
     const sender = new AptosAccount(privateKey);
-    console.log("to address is ",toAddress)
+    console.log("to address is ", toAddress);
     const transaction = await aptosClient.generateTransaction(
       sender.address(),
       {
         function: "0x1::object::transfer",
         type_arguments: ["0x4::token::Token"],
-        arguments: [nftAddress, "0x2b26c854845bf68db606b10042261747eda77e170d943e9b43db5bf771685524"],
+        arguments: [nftAddress, toAddress],
       }
     );
 
@@ -155,7 +155,7 @@ export default function SendNFT() {
   }, [userData]);
 
   const handleAddressChange = (value: string): void => {
-    console.log("before address update",address);
+    console.log("before address update", address);
     console.log("Handling address change", value);
     setAddress(value);
 
@@ -252,7 +252,7 @@ export default function SendNFT() {
             isLoading ? "opacity-50 cursor-not-allowed" : ""
           }`}
           onClick={handleNextClick}
-          disabled={isLoading}
+          disabled={isLoading && Boolean(address)}
         >
           {isLoading ? "Processing..." : "Confirm"}
         </button>
