@@ -185,6 +185,7 @@ export default function SendNFT() {
 
       //   addDebugInfo(`Initiating transfer: Amount: ${adjustedAmount}, To: ${toAddress}`);
       const txnHash = await transferNFTV2(privateKey, toAddress, nftAddress);
+      console.log("hash for sending transaction", txnHash);
       //   addDebugInfo(`Transaction successful with hash: ${txnHash}`);
       setTransactionHash(txnHash);
 
