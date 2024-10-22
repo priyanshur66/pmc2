@@ -249,10 +249,10 @@ export default function SendNFT() {
       <div className="mt-auto px-4 mb-6">
         <button
           className={`w-full bg-[#F33439] text-white py-3 rounded-lg font-bold ${
-            isLoading ? "opacity-50 cursor-not-allowed" : ""
+            isLoading || !isValidAddress ? "opacity-50 cursor-not-allowed" : ""
           }`}
           onClick={handleNextClick}
-          disabled={isLoading && Boolean(address)}
+          disabled={isLoading || !isValidAddress}
         >
           {isLoading ? "Processing..." : "Confirm"}
         </button>
