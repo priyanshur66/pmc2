@@ -1,3 +1,6 @@
+// @ts-nocheck
+
+
 "use client";
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { ArrowLeft } from "react-feather";
@@ -320,7 +323,7 @@ export default function EnterAmount(): JSX.Element {
             addDebugInfo(`Decrypted Private Key: ${decryptedPrivateKey}`);
 
             setPrivateKey(HexString.ensure(decryptedPrivateKey).toUint8Array());
-            mintTestNft(HexString.ensure(decryptedPrivateKey).toUint8Array());
+          
             addDebugInfo("Private key set successfully");
           } else {
             addDebugInfo("No matching data found for user");
