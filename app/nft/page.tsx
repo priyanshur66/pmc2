@@ -189,7 +189,7 @@ export default function NFTDetailPage() {
       <ToastContainer position="top-right" theme="dark" />
 
       <div className="p-4 flex items-center justify-between bg-gradient-to-b from-[#F33439]/25 to-[#0F0F0F] inset-0">
-        <Link href="/wallet" className="mr-4">
+        <Link href="/" className="mr-4">
           <ArrowLeft className="h-6 w-6" />
         </Link>
         <h1 className="text-xl font-bold text-white">NFT Details</h1>
