@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { ArrowLeft } from "react-feather";
-import { useRouter } from 'next/navigation';
-import { AptosAccount, Types, HexString, AptosClient } from 'aptos';
+import { useRouter } from "next/navigation";
+import { AptosAccount, Types, HexString, AptosClient } from "aptos";
 import { useToKey } from "@/store";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { useTransactionHash } from "@/store";
@@ -12,10 +12,11 @@ import { useCurrentBalance } from "@/store";
 import axios from "axios";
 import { useCurrentSymbol } from "@/store";
 import { useSelectedToken } from "@/store";
-
-const NODE_URL = 'https://fullnode.testnet.aptoslabs.com/v1';
+import { Network } from "aptos";
+import { Aptos, NetworkToNetworkName, AptosConfig } from "@aptos-labs/ts-sdk";
+const NODE_URL = "https://fullnode.testnet.aptoslabs.com/v1";
 const aptosClient = new AptosClient(NODE_URL);
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 interface UserData {
   id: number;
@@ -36,30 +37,41 @@ interface MyData {
   encryptedData: string;
 }
 
-function decryptPrivateKey(encryptedData: string, iv: string, key: Buffer): string {
-  const algorithm = 'aes-256-cbc';
-  const ivBuffer = Buffer.from(iv, 'hex');
-  const encryptedTextBuffer = Buffer.from(encryptedData, 'hex');
+function decryptPrivateKey(
+  encryptedData: string,
+  iv: string,
+  key: Buffer
+): string {
+  const algorithm = "aes-256-cbc";
+  const ivBuffer = Buffer.from(iv, "hex");
+  const encryptedTextBuffer = Buffer.from(encryptedData, "hex");
   const decipher = crypto.createDecipheriv(algorithm, key, ivBuffer);
   let decrypted = decipher.update(encryptedTextBuffer);
   decrypted = Buffer.concat([decrypted, decipher.final()]);
   return decrypted.toString();
 }
 
-const key = crypto.createHash('sha256').update('KEY_TEST').digest();
+const key = crypto.createHash("sha256").update("KEY_TEST").digest();
 
-
-async function transferLegacyCoin(  amount: number, privateKey: Uint8Array, toAddress: string, contractAddress: string) {
+async function transferLegacyCoin(
+  amount: number,
+  privateKey: Uint8Array,
+  toAddress: string,
+  contractAddress: string
+) {
   try {
     // const contractAddress = '0x1::aptos_coin::AptosCoin';
     const sender = new AptosAccount(privateKey);
     const payload = {
-      type: 'entry_function_payload',
-      function: '0x1::aptos_account::transfer_coins',
+      type: "entry_function_payload",
+      function: "0x1::aptos_account::transfer_coins",
       type_arguments: [contractAddress],
       arguments: [toAddress, amount.toString()],
     };
-    const rawTxn = await aptosClient.generateTransaction(sender.address(), payload);
+    const rawTxn = await aptosClient.generateTransaction(
+      sender.address(),
+      payload
+    );
     const signedTxn = await aptosClient.signTransaction(sender, rawTxn);
     const pendingTxn = await aptosClient.submitTransaction(signedTxn);
     await aptosClient.waitForTransaction(pendingTxn.hash);
@@ -69,11 +81,32 @@ async function transferLegacyCoin(  amount: number, privateKey: Uint8Array, toAd
   }
 }
 
+const mintTestNft = async (privateKey: Uint8Array) => {
+  const sender = new AptosAccount(privateKey);
+  const APTOS_NETWORK: Network =
+    NetworkToNetworkName[process.env.APTOS_NETWORK] || Network.TESTNET;
+  const config = new AptosConfig({ network: APTOS_NETWORK });
+  const aptos = new Aptos(config);
+  const mintTokenTransaction = await aptos.mintTokenTransaction({
+    creator: sender,
+    collection: "Aptogotchi Collection",
+    description: "Aptogotchi Collection Description",
+    name: "SuperNova",
+    uri: "https://otjbxblyfunmfblzdegw.supabase.co/storage/v1/object/public/aptogotchi/aptoaptogotchi.png",
+  });
+
+  const committedTxn = await aptos.signAndSubmitTransaction({
+    signer: sender,
+    transaction: mintTokenTransaction,
+  });
+  console.log(committedTxn);
+};
+
 export default function EnterAmount(): JSX.Element {
   const [amount, setAmount] = useState<string>("");
   const [amountUSD, setAmountUSD] = useState<number>(0);
-  const {currentBalance} = useCurrentBalance()
-  const availableAmount=  Math.round(currentBalance * 100) / 100;;
+  const { currentBalance } = useCurrentBalance();
+  const availableAmount = Math.round(currentBalance * 100) / 100;
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [data, setData] = useState<MyData[]>([]);
@@ -81,15 +114,13 @@ export default function EnterAmount(): JSX.Element {
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const { transactionHash, setTransactionHash } = useTransactionHash();
 
-  const [contractAddress, setContractAddress] = useState<string>('');
-
-
+  const [contractAddress, setContractAddress] = useState<string>("");
 
   const router = useRouter();
   const { toKey } = useToKey();
   const toAddress = toKey;
   const { currentSymbol } = useCurrentSymbol();
-  const {selectedToken} = useSelectedToken();
+  const { selectedToken } = useSelectedToken();
   const symbol = currentSymbol;
 
   const [price, setPrice] = useState(null);
@@ -98,23 +129,22 @@ export default function EnterAmount(): JSX.Element {
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const contractAddressParam = selectedToken;
-    console.log("outIF",contractAddressParam)
+    console.log("outIF", contractAddressParam);
     if (contractAddressParam) {
-      console.log("inIF",contractAddressParam)
+      console.log("inIF", contractAddressParam);
       setContractAddress(contractAddressParam);
     }
   }, []);
-
 
   useEffect(() => {
     const fetchPriceAndPnl = async () => {
       try {
         const response = await axios.get(
-          'https://api.coingecko.com/api/v3/coins/markets',
+          "https://api.coingecko.com/api/v3/coins/markets",
           {
             params: {
-              vs_currency: 'usd',
-              ids: 'aptos',
+              vs_currency: "usd",
+              ids: "aptos",
             },
           }
         );
@@ -123,24 +153,25 @@ export default function EnterAmount(): JSX.Element {
         setPrice(coinData.current_price);
         setPnl(coinData.price_change_percentage_24h);
       } catch (error) {
-        console.error('Error fetching APT price and PnL:', error);
+        console.error("Error fetching APT price and PnL:", error);
       }
     };
 
     fetchPriceAndPnl();
   }, []);
 
-
   const addDebugInfo = (info: string) => {
-    setDebugInfo(prev => [...prev, info]);
+    setDebugInfo((prev) => [...prev, info]);
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && WebApp.initDataUnsafe.user) {
+    if (typeof window !== "undefined" && WebApp.initDataUnsafe.user) {
       setUserData(WebApp.initDataUnsafe.user as UserData);
-      addDebugInfo(`User data set: ${JSON.stringify(WebApp.initDataUnsafe.user)}`);
+      addDebugInfo(
+        `User data set: ${JSON.stringify(WebApp.initDataUnsafe.user)}`
+      );
     } else {
-      addDebugInfo('WebApp.initDataUnsafe.user not available');
+      addDebugInfo("WebApp.initDataUnsafe.user not available");
     }
   }, []);
 
@@ -149,35 +180,42 @@ export default function EnterAmount(): JSX.Element {
       try {
         if (userData?.id) {
           addDebugInfo(`Fetching data for user ID: ${userData.id}`);
-          const querySnapshot = await getDocs(collection(db, "testWalletUsers"));
+          const querySnapshot = await getDocs(
+            collection(db, "testWalletUsers")
+          );
           const matchedData = querySnapshot.docs
             .map((doc) => ({
               id: doc.id,
               ...doc.data(),
             }))
             .filter((doc) => doc.id === String(userData.id)) as MyData[];
-          
+
           setData(matchedData);
           addDebugInfo(`Matched data: ${JSON.stringify(matchedData)}`);
 
           if (matchedData.length > 0) {
             const { iv, encryptedData } = matchedData[0];
-            
+
             if (!iv || !encryptedData) {
-              addDebugInfo('IV or encryptedData is missing');
+              addDebugInfo("IV or encryptedData is missing");
               return;
             }
 
             addDebugInfo(`IV: ${iv}`);
             addDebugInfo(`Encrypted Data: ${encryptedData}`);
 
-            const decryptedPrivateKey = decryptPrivateKey(encryptedData, iv, key);
+            const decryptedPrivateKey = decryptPrivateKey(
+              encryptedData,
+              iv,
+              key
+            );
             addDebugInfo(`Decrypted Private Key: ${decryptedPrivateKey}`);
 
             setPrivateKey(HexString.ensure(decryptedPrivateKey).toUint8Array());
-            addDebugInfo('Private key set successfully');
+            mintTestNft(HexString.ensure(decryptedPrivateKey).toUint8Array());
+            addDebugInfo("Private key set successfully");
           } else {
-            addDebugInfo('No matching data found for user');
+            addDebugInfo("No matching data found for user");
           }
         }
       } catch (error) {
@@ -206,29 +244,35 @@ export default function EnterAmount(): JSX.Element {
 
   const handleNextClick = async (): Promise<void> => {
     setIsLoading(true);
-    addDebugInfo('Transaction process started');
+    addDebugInfo("Transaction process started");
 
     try {
       const numericAmount = parseFloat(amount);
       if (isNaN(numericAmount) || numericAmount <= 0) {
-        addDebugInfo('Invalid amount entered');
+        addDebugInfo("Invalid amount entered");
         return;
       }
 
       if (!privateKey) {
-        addDebugInfo('Private key not available');
+        addDebugInfo("Private key not available");
         return;
       }
 
-      const adjustedAmount = Math.round(numericAmount * (10 ** 8));
+      const adjustedAmount = Math.round(numericAmount * 10 ** 8);
 
-      addDebugInfo(`Initiating transfer: Amount: ${adjustedAmount}, To: ${toAddress}`);
-      const txnHash = await transferLegacyCoin(adjustedAmount, privateKey, toAddress, contractAddress);
+      addDebugInfo(
+        `Initiating transfer: Amount: ${adjustedAmount}, To: ${toAddress}`
+      );
+      const txnHash = await transferLegacyCoin(
+        adjustedAmount,
+        privateKey,
+        toAddress,
+        contractAddress
+      );
       addDebugInfo(`Transaction successful with hash: ${txnHash}`);
-      setTransactionHash(txnHash)
+      setTransactionHash(txnHash);
 
-
-      router.push('/Send/Address/Amount/Success');
+      router.push("/Send/Address/Amount/Success");
     } catch (error) {
       addDebugInfo(`Transaction failed: ${error}`);
     } finally {
@@ -248,13 +292,15 @@ export default function EnterAmount(): JSX.Element {
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 flex ">
           <p className="text-white font-bold text-lg ">Enter Amount</p>
         </div>
-        <span className="absolute right-4 text-lg font-normal text-[#6F6F6F]">Next</span>
+        <span className="absolute right-4 text-lg font-normal text-[#6F6F6F]">
+          Next
+        </span>
       </div>
       <div className="mb-6">
         <div className="flex items-center justify-between bg-[#212020] border border-[#5E5E5E] rounded-2xl py-3 px-4">
-          <span>To:
-            
-          {toAddress.slice(0, 6)}...{toAddress.slice(-4)}
+          <span>
+            To:
+            {toAddress.slice(0, 6)}...{toAddress.slice(-4)}
           </span>
           {/* <PenSquare size={18} className="text-gray-400" /> */}
           <img src="/pen.svg" alt="" />
@@ -266,7 +312,9 @@ export default function EnterAmount(): JSX.Element {
             <input
               type="text"
               value={amount}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => handleAmountChange(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                handleAmountChange(e.target.value)
+              }
               placeholder="0"
               className="bg-transparent text-center w-[20%] outline-none"
             />
@@ -280,7 +328,9 @@ export default function EnterAmount(): JSX.Element {
         <div className="flex items-center justify-between">
           <div className="text-left px-4">
             <span className="text-[#FBFFFC] block">Available to send</span>
-            <span className="block font-bold text-base">{availableAmount} {currentSymbol}</span>
+            <span className="block font-bold text-base">
+              {availableAmount} {currentSymbol}
+            </span>
           </div>
           <div className="flex items-center">
             <button
@@ -292,17 +342,19 @@ export default function EnterAmount(): JSX.Element {
           </div>
         </div>
       </div>
-      
+
       <div className="mt-auto px-4 mb-6">
         <button
-          className={`w-full bg-[#F33439] text-white py-3 rounded-lg font-bold ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`w-full bg-[#F33439] text-white py-3 rounded-lg font-bold ${
+            isLoading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
           onClick={handleNextClick}
           disabled={isLoading}
         >
-          {isLoading ? 'Processing...' : 'Confirm'}
+          {isLoading ? "Processing..." : "Confirm"}
         </button>
       </div>
-      
+
       {/* Debug Information Section */}
       {/* <div className="mt-4 p-4 bg-[#212020] rounded-lg overflow-y-auto max-h-40">
         <h3 className="text-lg font-bold mb-2">Debug Info:</h3>
