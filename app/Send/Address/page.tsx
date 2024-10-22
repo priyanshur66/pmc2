@@ -53,7 +53,7 @@ export default function SendAPT() {
         </div>
       </div>
 
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <h2 className="text-sm text-white mb-2">Recently used</h2>
         <div className="flex items-center rounded-lg p-3">
           <div className="bg-[#212020] rounded-full p-2 mr-3">
@@ -64,7 +64,7 @@ export default function SendAPT() {
             <p className="text-sm text-gray-400">Used 2d ago</p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="mt-auto px-4 mb-6">
         <button
