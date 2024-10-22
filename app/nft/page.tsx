@@ -88,6 +88,7 @@ export default function NFTDetailPage() {
         );
 
         const nftDetails = response.data.data.current_token_ownerships_v2[0];
+        console.log("nft details are ", nftDetails);
         if (!nftDetails) throw new Error("NFT not found");
 
         if (mounted) {
