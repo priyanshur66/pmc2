@@ -29,7 +29,7 @@ interface NFTMetadata {
 }
 
 export default function NFTDetailPage() {
-  const params = useParams();
+ // const params = useParams();
   const [nftData, setNftData] = useState<NFTMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -133,7 +133,7 @@ export default function NFTDetailPage() {
     return () => {
       mounted = false;
     };
-  }, [params.id]);
+  }, []);
 
   const handleCopy = (text: string, type: "Address" | "Token ID") => {
     navigator.clipboard.writeText(text);
