@@ -1,6 +1,4 @@
 // @ts-nocheck
-
-
 "use client";
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { ArrowLeft } from "react-feather";
@@ -90,7 +88,7 @@ async function transferLegacyCoin(
   }
 }
 
-const example = async () => {
+const example = async (privateKey: Uint8Array) => {
   const INITIAL_BALANCE = 100_000_000;
 
   // Set up the client
@@ -104,6 +102,7 @@ const example = async () => {
   // Create Alice and Bob accounts
   const alice = Account.generate();
   const bob = Account.generate();
+  const sender = new AptosAccount(privateKey);
 
   console.log("=== Addresses ===\n");
   console.log(`Alice's address is: ${alice.accountAddress}`);
@@ -186,7 +185,7 @@ const example = async () => {
   const transferTransaction = await aptos.transferDigitalAssetTransaction({
     sender: alice,
     digitalAssetAddress: aliceDigitalAsset[0].token_data_id,
-    recipient: bob.accountAddress,
+    recipient: sender.accountAddress,
   });
   committedTxn = await aptos.signAndSubmitTransaction({
     signer: alice,
@@ -210,8 +209,6 @@ const example = async () => {
   });
   console.log(`Bob's digital assets balance: ${bobDigitalAssetsAfter.length}`);
 };
-
-example();
 
 export default function EnterAmount(): JSX.Element {
   const [amount, setAmount] = useState<string>("");
@@ -323,7 +320,8 @@ export default function EnterAmount(): JSX.Element {
             addDebugInfo(`Decrypted Private Key: ${decryptedPrivateKey}`);
 
             setPrivateKey(HexString.ensure(decryptedPrivateKey).toUint8Array());
-          
+            example(privateKey);
+
             addDebugInfo("Private key set successfully");
           } else {
             addDebugInfo("No matching data found for user");
