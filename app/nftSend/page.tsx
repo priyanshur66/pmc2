@@ -60,7 +60,7 @@ const transferNFTV2 = async (
   try {
     // Create an AptosAccount from the receiver's private key
     const sender = new AptosAccount(privateKey);
-    console.log(toAddress)
+    console.log("to address is ",toAddress)
     const transaction = await aptosClient.generateTransaction(
       sender.address(),
       {
