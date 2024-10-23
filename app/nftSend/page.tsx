@@ -1,4 +1,3 @@
-//@ts-nocheck
 "use client";
 import React, { useState, ChangeEvent } from "react";
 import { ArrowLeft } from "react-feather";
@@ -53,50 +52,30 @@ function decryptPrivateKey(
 
 const key = crypto.createHash("sha256").update("KEY_TEST").digest();
 
-// Updated transfer function to handle both NFT and token transfer
 const transferNFTV2 = async (
   privateKey: Uint8Array,
   toAddress: string,
   nftAddress: string
 ) => {
   try {
+    // Create an AptosAccount from the receiver's private key
     const sender = new AptosAccount(privateKey);
-    console.log("Sender address:", sender.address().toString());
-    console.log("To address:", toAddress);
-    console.log("NFT address:", nftAddress);
-
-    // First, get the token information
-    const tokenInfo = await aptosClient.getAccountResource(
-      nftAddress,
-      "0x4::token::Token"
-    );
-
-    // Create a multi-transaction payload
+    console.log("to address is ", toAddress);
     const transaction = await aptosClient.generateTransaction(
       sender.address(),
       {
-        function: "0x4::token::transfer",
-        type_arguments: [],
+        function: "0x1::object::transfer",
+        type_arguments: ["0x4::token::Token"],
         arguments: [nftAddress, toAddress],
       }
     );
 
-    // Sign and submit the transaction
     const signedTxn = await aptosClient.signTransaction(sender, transaction);
     const pendingTxn = await aptosClient.submitTransaction(signedTxn);
 
-    // Wait for transaction confirmation
-    const txnResult = await aptosClient.waitForTransaction(pendingTxn.hash);
-
-    // Verify the transaction success
-    if (txnResult?.success) {
-      console.log("Transfer successful:", pendingTxn.hash);
-      return pendingTxn.hash;
-    } else {
-      throw new Error("Transaction failed");
-    }
+    await aptosClient.waitForTransaction(pendingTxn.hash);
+    return pendingTxn.hash;
   } catch (error) {
-    console.error("Transfer error:", error);
     throw error;
   }
 };
@@ -107,7 +86,6 @@ export default function SendNFT() {
   const [isValidAddress, setIsValidAddress] = useState(false);
   const [privateKey, setPrivateKey] = useState<Uint8Array | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const { transactionHash, setTransactionHash } = useTransactionHash();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [data, setData] = useState<MyData[]>([]);
@@ -120,6 +98,9 @@ export default function SendNFT() {
   useEffect(() => {
     if (typeof window !== "undefined" && WebApp.initDataUnsafe.user) {
       setUserData(WebApp.initDataUnsafe.user as UserData);
+      //   addDebugInfo(`User data set: ${JSON.stringify(WebApp.initDataUnsafe.user)}`);
+    } else {
+      //   addDebugInfo('WebApp.initDataUnsafe.user not available');
     }
   }, []);
 
@@ -127,6 +108,7 @@ export default function SendNFT() {
     const fetchData = async () => {
       try {
         if (userData?.id) {
+          //   addDebugInfo(`Fetching data for user ID: ${userData.id}`);
           const querySnapshot = await getDocs(
             collection(db, "testWalletUsers")
           );
@@ -138,27 +120,34 @@ export default function SendNFT() {
             .filter((doc) => doc.id === String(userData.id)) as MyData[];
 
           setData(matchedData);
+          //   addDebugInfo(`Matched data: ${JSON.stringify(matchedData)}`);
 
           if (matchedData.length > 0) {
             const { iv, encryptedData } = matchedData[0];
 
             if (!iv || !encryptedData) {
-              setError("Missing encryption data");
+              //   addDebugInfo('IV or encryptedData is missing');
               return;
             }
+
+            // addDebugInfo(`IV: ${iv}`);
+            // addDebugInfo(`Encrypted Data: ${encryptedData}`);
 
             const decryptedPrivateKey = decryptPrivateKey(
               encryptedData,
               iv,
               key
             );
+            // addDebugInfo(`Decrypted Private Key: ${decryptedPrivateKey}`);
 
             setPrivateKey(HexString.ensure(decryptedPrivateKey).toUint8Array());
+            // addDebugInfo('Private key set successfully');
+          } else {
+            // addDebugInfo('No matching data found for user');
           }
         }
       } catch (error) {
-        setError("Failed to fetch user data");
-        console.error(error);
+        // addDebugInfo(`Error fetching data: ${error}`);
       }
     };
 
@@ -166,34 +155,43 @@ export default function SendNFT() {
   }, [userData]);
 
   const handleAddressChange = (value: string): void => {
+    console.log("before address update", address);
+    console.log("Handling address change", value);
     setAddress(value);
+
+    // Check if the entered address is a valid Aptos address
     const isValidAptosAddress = /^0x[a-fA-F0-9]{61,64}$/.test(value.trim());
     setIsValidAddress(isValidAptosAddress);
+    console.log("Entered address:", value);
+  };
+
+  const handleNext = () => {
+    if (isValidAddress) {
+      router.push("/Send/Address/Amount");
+    }
   };
 
   const handleNextClick = async (): Promise<void> => {
     setIsLoading(true);
-    setError(null);
+    // addDebugInfo('Transaction process started');
 
     try {
       if (!privateKey) {
-        throw new Error("Private key not available");
+        // addDebugInfo('Private key not available');
+        return;
       }
 
-      if (!isValidAddress) {
-        throw new Error("Invalid recipient address");
-      }
+      //   const adjustedAmount = Math.round(numericAmount * (10 ** 8));
 
-      if (!nftAddress) {
-        throw new Error("No NFT selected");
-      }
-
+      //   addDebugInfo(`Initiating transfer: Amount: ${adjustedAmount}, To: ${toAddress}`);
       const txnHash = await transferNFTV2(privateKey, toAddress, nftAddress);
+      console.log("hash for sending transaction", txnHash);
+      //   addDebugInfo(`Transaction successful with hash: ${txnHash}`);
       setTransactionHash(txnHash);
+
       router.push("/nftSend/Success");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Transaction failed");
-      console.error(error);
+      //   addDebugInfo(`Transaction failed: ${error}`);
     } finally {
       setIsLoading(false);
     }
@@ -208,6 +206,9 @@ export default function SendNFT() {
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 flex">
           <p className="text-white font-bold text-lg">Send NFT</p>
         </div>
+        <span className="absolute right-4 text-lg font-normal text-[#6F6F6F]">
+          Next
+        </span>
       </div>
 
       <div className="mb-6">
@@ -229,11 +230,22 @@ export default function SendNFT() {
         </div>
       </div>
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-500 bg-opacity-20 rounded-lg text-red-300">
-          {error}
+      {/* <div className="mb-6">
+        <h2 className="text-sm text-white mb-2">Recently used</h2>
+        <div className="h-64 rounded-xl overflow-hidden mb-4">
+          {nftImage ? (
+            <img
+              src={nftImage}
+              alt="NFT"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-700">
+              <span>No image available</span>
+            </div>
+          )}
         </div>
-      )}
+      </div> */}
 
       <div className="mt-auto px-4 mb-6">
         <button
