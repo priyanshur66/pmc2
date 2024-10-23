@@ -230,7 +230,7 @@ export default function SendNFT() {
         </div>
       </div>
 
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <h2 className="text-sm text-white mb-2">Recently used</h2>
         <div className="h-64 rounded-xl overflow-hidden mb-4">
           {nftImage ? (
@@ -245,7 +245,7 @@ export default function SendNFT() {
             </div>
           )}
         </div>
-      </div>
+      </div> */}
 
       <div className="mt-auto px-4 mb-6">
         <button
