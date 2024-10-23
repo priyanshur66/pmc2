@@ -49,7 +49,7 @@ const TransactionSuccess: React.FC = () => {
     const fetchTransactionDetails = async () => {
       try {
         const response = await fetch(
-          `https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/0x0e9442cde88cdcc4b6edb04e541674af1e7f4bfbce75196447e095c0dd2647e3`
+          `https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${transactionHash}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch transaction details");
