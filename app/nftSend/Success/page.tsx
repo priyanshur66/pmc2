@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React from "react";
 import { ArrowRight, X, ExternalLink } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -39,11 +39,15 @@ interface TransactionDetails {
 
 const TransactionSuccess: React.FC = () => {
   const router = useRouter();
-  const [transactionDetails, setTransactionDetails] = useState<TransactionDetails | null>(null);
+  const [transactionDetails, setTransactionDetails] =
+    useState<TransactionDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { transactionHash } = useTransactionHash();
   const { currentSymbol } = useCurrentSymbol();
+  const [transferedAssetName, setTransferedAssetName] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchTransactionDetails = async () => {
@@ -55,7 +59,8 @@ const TransactionSuccess: React.FC = () => {
           throw new Error("Failed to fetch transaction details");
         }
         const data = await response.json();
-        
+        setTransferedAssetName(data[4].data.data.name.value);
+
         // Find the transfer event
         const transferEvent = data.events.find(
           (event: any) => event.type === "0x1::object::TransferEvent"
@@ -72,7 +77,7 @@ const TransactionSuccess: React.FC = () => {
           events: data.events,
           version: data.version,
           hash: data.hash,
-          changes: data.changes
+          changes: data.changes,
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error occurred");
@@ -118,16 +123,16 @@ const TransactionSuccess: React.FC = () => {
     payload,
     hash,
     version,
-    changes
+    changes,
   } = transactionDetails;
 
   const date = new Date(Math.floor(parseInt(timestamp) / 1000));
   const txnFee = (parseInt(gas_used) * parseInt(gas_unit_price)) / 100000000;
-  
-  // Get asset name from changes array
-  const assetName = changes[6]?.data?.data?.name?.value || "Asset Transfer";
 
-  const shortenAddress = (address: string) => 
+  // Get asset name from changes array
+  const assetName = changes[4].data.data.name.value || "Asset Transfer";
+
+  const shortenAddress = (address: string) =>
     `${address.slice(0, 6)}...${address.slice(-4)}`;
 
   return (
@@ -151,10 +156,10 @@ const TransactionSuccess: React.FC = () => {
       </div>
 
       <div className="text-center mb-6">
-        <div className="text-2xl font-bold mb-2">
-          {assetName}
-        </div>
-        <div className={`text-lg ${success ? "text-green-500" : "text-red-500"}`}>
+        <div className="text-2xl font-bold mb-2">{transferedAssetName}</div>
+        <div
+          className={`text-lg ${success ? "text-green-500" : "text-red-500"}`}
+        >
           {success ? "Transaction Successful" : "Transaction Failed"}
         </div>
       </div>
@@ -203,8 +208,8 @@ const TransactionSuccess: React.FC = () => {
         </div>
       </div>
 
-      <button 
-        onClick={() => router.push('/wallet')}
+      <button
+        onClick={() => router.push("/wallet")}
         className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-semibold transition-colors"
       >
         Done
