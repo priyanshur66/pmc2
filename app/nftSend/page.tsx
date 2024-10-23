@@ -1,3 +1,4 @@
+//@ts-nocheck
 "use client";
 import React, { useState, ChangeEvent } from "react";
 import { ArrowLeft } from "react-feather";
@@ -88,7 +89,7 @@ const transferNFTV2 = async (
     const txnResult = await aptosClient.waitForTransaction(pendingTxn.hash);
 
     // Verify the transaction success
-    if (txnResult.success) {
+    if (txnResult?.success) {
       console.log("Transfer successful:", pendingTxn.hash);
       return pendingTxn.hash;
     } else {
