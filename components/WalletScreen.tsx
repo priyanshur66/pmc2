@@ -5,24 +5,26 @@ import { Bars3Icon, EllipsisVerticalIcon } from "@heroicons/react/16/solid";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
+  getFirestore,
   collection,
   getDocs,
-  query,
-  where,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
 } from "firebase/firestore";
+import { getDoc, setDoc } from "firebase/firestore";
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
 import axios from "axios";
+import { Clipboard } from "lucide-react";
+import { useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { 
-  usePublicKey,
-  useIvData,
-  useEncryptedValue,
-  useCurrentBalance,
-  useCurrentSymbol
-} from "@/store";
+import { usePublicKey } from "@/store";
+import { useIvData } from "@/store";
+import { useEncryptedValue } from "@/store";
 
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 
@@ -57,201 +59,254 @@ interface MyData {
 
 type TabType = "Tokens" | "NFTs";
 
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+interface TabContentProps {
+  activeTab: TabType;
+}
+
+const TabContent: React.FC<TabContentProps> = ({ activeTab }) => {
+  const [price, setPrice] = useState(null);
+  const [pnl, setPnl] = useState(null);
+
+  useEffect(() => {
+    const fetchPriceAndPnl = async () => {
+      try {
+        const response = await axios.get(
+          "https://api.coingecko.com/api/v3/coins/markets",
+          {
+            params: {
+              vs_currency: "usd",
+              ids: "aptos",
+            },
+          }
+        );
+
+        const coinData = response.data[0];
+        setPrice(coinData.current_price);
+        setPnl(coinData.price_change_percentage_24h);
+      } catch (error) {
+        console.error("Error fetching APT price and PnL:", error);
+      }
+    };
+
+    fetchPriceAndPnl();
+  }, []);
+
+  if (activeTab === "Tokens") {
+    return (
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <div className="w-10 h-10 bg-[url('../public/aptos.svg')] rounded-full"></div>{" "}
+          <div className="grid-rows-2">
+            <p className="font-semibold px-4 text-xl">Aptos</p>
+            <p className="font-light px-4 text-s mt-1">
+              ${price}
+              <span
+                className={
+                  pnl !== null && pnl >= 0
+                    ? "ml-1 text-green-500"
+                    : "ml-1 text-red-500"
+                }
+              >
+                {pnl !== null ? String(pnl).slice(0, 4) : "N/A"}%
+              </span>
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col items-end">
+          <p className="text-xl font-bold">100 APT</p>
+          <p className="text-lg font-light">${Number(price || 0) * 100} </p>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <p className="text-[#9F9F9F] text-base font-light text-center py-4">
+      You don&apos;t have any NFTs yet
+    </p>
+  );
+};
+
+const NODE_URL = "https://fullnode.devnet.aptoslabs.com/v1";
 
 const WalletScreen = () => {
   const [activeTab, setActiveTab] = useState<TabType>("Tokens");
   const [userData, setUserData] = useState<UserData | null>(null);
   const [data, setData] = useState<MyData[]>([]);
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [lastFetchTimestamp, setLastFetchTimestamp] = useState<number>(0);
-  const spanRef = React.useRef<HTMLSpanElement | null>(null);
-  
-  // Zustand store hooks
+  const [address, setAddress] = useState("");
+  const [isBalanceVisible, setIsBalanceVisible] = useState(true); // State to control balance visibility
+  const spanRef = useRef<HTMLSpanElement | null>(null);
   const { publicKey, setPublicKey } = usePublicKey();
   const { ivData, setIvData } = useIvData();
   const { encryptedValue, setEncryptedValue } = useEncryptedValue();
-  const { currentBalance, setCurrentBalance } = useCurrentBalance();
-  const { currentSymbol, setCurrentSymbol } = useCurrentSymbol();
 
-  // Check if cache is still valid
-  const isCacheValid = () => {
-    return Date.now() - lastFetchTimestamp < CACHE_DURATION;
-  };
-
-  // Initialize WebApp user data
-  useEffect(() => {
-    try {
-      if (typeof window !== "undefined" && WebApp.initDataUnsafe?.user) {
-        setUserData(WebApp.initDataUnsafe.user as UserData);
-      }
-    } catch (error) {
-      console.error("Error initializing WebApp:", error);
-      setError("Failed to initialize user data");
-    }
-  }, []);
-
-  // Fetch user data from Firestore with caching
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!userData?.id) return;
-
-      // If we have cached data and it's still valid, don't fetch
-      if (publicKey && ivData && encryptedValue && isCacheValid()) {
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const usersRef = collection(db, "testWalletUsers");
-        const q = query(usersRef, where("userName", "==", userData.id));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-          // If query returns empty but we have stored data, keep the stored data
-          if (publicKey && ivData && encryptedValue) {
-            setIsLoading(false);
-            return;
-          }
-          setError("User not found");
-          return;
-        }
-
-        const userDocs = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as MyData[];
-
-        setData(userDocs);
-        
-        if (userDocs.length > 0) {
-          const userData = userDocs[0];
-          // Only update store if new values are not empty
-          if (userData.publicKey) setPublicKey(userData.publicKey);
-          if (userData.iv) setIvData(userData.iv);
-          if (userData.encryptedData) setEncryptedValue(userData.encryptedData);
-          
-          setLastFetchTimestamp(Date.now());
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setError("Failed to fetch user data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, [userData?.id, setPublicKey, setIvData, setEncryptedValue, publicKey, ivData, encryptedValue]);
-
-  // Fetch token balances with caching
-  const fetchTokenBalances = async (walletPublicKey: string) => {
-    if (!walletPublicKey) return;
-
-    try {
-      const TokensCollectionurl = "https://api.devnet.aptoslabs.com/v1/graphql";
-      const query = `
-        query MyQuery {
-          current_fungible_asset_balances(
-            where: {owner_address: {_eq: "${walletPublicKey}"}, amount: {_gt: "0"}}
-          ) {
-            owner_address
-            amount
-            metadata {
-              asset_type
-              name
-              supply_v2
-              symbol
-              token_standard
-              decimals
-            }
+  const fetchTokenBalances = async (publicKey: string) => {
+    const TokensCollectionurl = "https://api.devnet.aptoslabs.com/v1/graphql";
+    const query = `
+      query MyQuery {
+        current_fungible_asset_balances(
+          where: {owner_address: {_eq: "${publicKey}"}, amount: {_gt: "0"}}
+        ) {
+          owner_address
+          amount
+          metadata {
+            asset_type
+            name
+            supply_v2
+            symbol
             token_standard
+            decimals
           }
+          token_standard
         }
-      `;
+      }
+    `;
 
+    try {
       const response = await axios.post(TokensCollectionurl, { query });
       const balances = response.data.data.current_fungible_asset_balances;
 
-      const formattedBalances = balances
-        .filter((balance: any) => {
-          const { token_standard, metadata } = balance;
-          return (
-            (token_standard === "v1" && !metadata.name.includes("LP")) ||
-            token_standard === "v2"
-          );
-        })
-        .map((balance: any) => {
-          const formattedBalance = balance.amount / 10 ** balance.metadata.decimals;
-          return {
-            name: balance.metadata.name,
-            balance: formattedBalance,
-            contractAddress: balance.metadata.asset_type,
-            standard: balance.token_standard,
-          };
-        });
+      const tempArray: TokenBalance[] = [];
 
-      // Update token balances
-      setTokenBalances(formattedBalances);
+      for (const balance of balances) {
+        const tokenDecimals = balance.metadata.decimals;
+        const tokenBalance = balance.amount;
+        const tokenName = balance.metadata.name;
+        const tokenContractAddress = balance.metadata.asset_type;
+        const tokenStandard = balance.token_standard;
+        const formattedTokenBalance = tokenBalance / 10 ** tokenDecimals;
 
-      // Update current balance and symbol in store if APT is found
-      const aptToken = formattedBalances.find(token => token.name.toLowerCase() === 'aptos');
-      if (aptToken) {
-        setCurrentBalance(aptToken.balance);
-        setCurrentSymbol('APT');
+        if (tokenStandard === "v1" && !tokenName.includes("LP")) {
+          tempArray.push({
+            name: tokenName,
+            balance: formattedTokenBalance,
+            contractAddress: tokenContractAddress,
+            standard: tokenStandard,
+          });
+        } else if (tokenStandard === "v2") {
+          tempArray.push({
+            name: tokenName,
+            balance: formattedTokenBalance,
+            contractAddress: tokenContractAddress,
+            standard: tokenStandard,
+          });
+        }
       }
 
+      setTokenBalances(tempArray);
     } catch (error) {
       console.error("Error fetching token balances:", error);
-      toast.error("Failed to fetch token balances");
     }
   };
 
-  // Fetch token balances when public key is available or cache expires
   useEffect(() => {
-    if (publicKey && (!isCacheValid() || tokenBalances.length === 0)) {
-      fetchTokenBalances(publicKey);
+    console.log("data is", data);
+    if (data.length > 0) {
+      fetchTokenBalances(data[0].publicKey);
+      setPublicKey(data[0].publicKey);
+      setIvData(data[0].iv);
+      setEncryptedValue(data[0].encryptedData);
+      const res = usePublicKey.getState().publicKey;
+      setAddress(res);
+      console.log(address);
     }
-  }, [publicKey]);
+  }, [data]);
 
-  const handleCopy = async () => {
-    if (!spanRef.current?.textContent) return;
-
-    try {
-      await navigator.clipboard.writeText(spanRef.current.textContent);
-      toast.success("Copied to clipboard!");
-    } catch (error) {
-      console.error("Failed to copy:", error);
-      toast.error("Failed to copy to clipboard");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (WebApp.initDataUnsafe.user) {
+        setUserData(WebApp.initDataUnsafe.user as UserData);
+      }
     }
+  });
+
+  console.log(userData?.id);
+
+  useEffect(() => {
+    const fetchData = async (msg: any) => {
+      try {
+        if (userData?.id) {
+          const querySnapshot = await getDocs(
+            collection(db, "testWalletUsers")
+          );
+          const matchedData = querySnapshot.docs
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+            .filter((doc) => doc.id === String(userData.id)) as MyData[];
+
+          setData(matchedData);
+        } else {
+        }
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      }
+    };
+
+    const msg = {
+      chat: {
+        id: userData?.id,
+        username: userData?.username || "N/A",
+      },
+      text: "", // Set appropriate text if needed
+    };
+
+    fetchData(msg);
+  }, [userData]);
+
+  const toggleBalanceVisibility = () => {
+    setIsBalanceVisible(!isBalanceVisible); // Toggle balance visibility
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-      </div>
-    );
-  }
-
-  if (error && !publicKey) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen px-4">
-        <p className="text-red-500 text-center mb-4">{error}</p>
-        <button 
-          onClick={() => window.location.reload()}
-          className="bg-red-500 text-white px-4 py-2 rounded-lg"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+  // const handleCopy = () => {
+  //   if (spanRef.current) {
+  //     const textToCopy = spanRef.current.textContent;
+  //     if (textToCopy) {
+  //       navigator.clipboard.writeText(textToCopy)
+  //         .then(() => {
+  //           alert('Copied to clipboard!');
+  //         })
+  //         .catch((err) => {
+  //           console.error('Failed to copy: ', err);
+  //         });
+  //     }
+  //   }
+  // };
+  const handleCopy = () => {
+    if (spanRef.current) {
+      const textToCopy = spanRef.current.textContent;
+      if (textToCopy) {
+        navigator.clipboard
+          .writeText(textToCopy)
+          .then(() => {
+            toast.success("Copied to clipboard!", {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "dark",
+            });
+          })
+          .catch((err) => {
+            toast.error("Failed to copy!", {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "dark",
+            });
+            console.error("Failed to copy: ", err);
+          });
+      }
+    }
+  };
 
   return (
     <div>
