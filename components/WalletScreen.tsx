@@ -5,12 +5,10 @@ import { Bars3Icon, EllipsisVerticalIcon } from "@heroicons/react/16/solid";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  getFirestore,
   collection,
   getDocs,
   query,
   where,
-  DocumentData,
 } from "firebase/firestore";
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
@@ -18,9 +16,13 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { usePublicKey } from "@/store";
-import { useIvData } from "@/store";
-import { useEncryptedValue } from "@/store";
+import { 
+  usePublicKey,
+  useIvData,
+  useEncryptedValue,
+  useCurrentBalance,
+  useCurrentSymbol
+} from "@/store";
 
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 
@@ -55,23 +57,28 @@ interface MyData {
 
 type TabType = "Tokens" | "NFTs";
 
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
 const WalletScreen = () => {
   const [activeTab, setActiveTab] = useState<TabType>("Tokens");
   const [userData, setUserData] = useState<UserData | null>(null);
   const [data, setData] = useState<MyData[]>([]);
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
-  const [address, setAddress] = useState("");
-  const [isBalanceVisible, setIsBalanceVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [price, setPrice] = useState<number | null>(null);
+  const [lastFetchTimestamp, setLastFetchTimestamp] = useState<number>(0);
   const spanRef = React.useRef<HTMLSpanElement | null>(null);
-
+  
+  // Zustand store hooks
   const { publicKey, setPublicKey } = usePublicKey();
   const { ivData, setIvData } = useIvData();
   const { encryptedValue, setEncryptedValue } = useEncryptedValue();
-  const toggleBalanceVisibility = () => {
-    setIsBalanceVisible(!isBalanceVisible); // Toggle balance visibility
+  const { currentBalance, setCurrentBalance } = useCurrentBalance();
+  const { currentSymbol, setCurrentSymbol } = useCurrentSymbol();
+
+  // Check if cache is still valid
+  const isCacheValid = () => {
+    return Date.now() - lastFetchTimestamp < CACHE_DURATION;
   };
 
   // Initialize WebApp user data
@@ -86,10 +93,16 @@ const WalletScreen = () => {
     }
   }, []);
 
-  // Fetch user data from Firestore
+  // Fetch user data from Firestore with caching
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userData?.id) return;
+
+      // If we have cached data and it's still valid, don't fetch
+      if (publicKey && ivData && encryptedValue && isCacheValid()) {
+        setIsLoading(false);
+        return;
+      }
 
       setIsLoading(true);
       setError(null);
@@ -100,23 +113,30 @@ const WalletScreen = () => {
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
+          // If query returns empty but we have stored data, keep the stored data
+          if (publicKey && ivData && encryptedValue) {
+            setIsLoading(false);
+            return;
+          }
           setError("User not found");
           return;
         }
 
-        const userDocs = querySnapshot.docs.map((doc) => ({
+        const userDocs = querySnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data(),
+          ...doc.data()
         })) as MyData[];
 
         setData(userDocs);
-
-        // Initialize store values
+        
         if (userDocs.length > 0) {
-          setPublicKey(userDocs[0].publicKey);
-          setIvData(userDocs[0].iv);
-          setEncryptedValue(userDocs[0].encryptedData);
-          setAddress(userDocs[0].publicKey);
+          const userData = userDocs[0];
+          // Only update store if new values are not empty
+          if (userData.publicKey) setPublicKey(userData.publicKey);
+          if (userData.iv) setIvData(userData.iv);
+          if (userData.encryptedData) setEncryptedValue(userData.encryptedData);
+          
+          setLastFetchTimestamp(Date.now());
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -127,18 +147,18 @@ const WalletScreen = () => {
     };
 
     fetchUserData();
-  }, [userData?.id, setPublicKey, setIvData, setEncryptedValue]);
+  }, [userData?.id, setPublicKey, setIvData, setEncryptedValue, publicKey, ivData, encryptedValue]);
 
-  // Fetch token balances
-  const fetchTokenBalances = async (publicKey: string) => {
-    if (!publicKey) return;
+  // Fetch token balances with caching
+  const fetchTokenBalances = async (walletPublicKey: string) => {
+    if (!walletPublicKey) return;
 
     try {
       const TokensCollectionurl = "https://api.devnet.aptoslabs.com/v1/graphql";
       const query = `
         query MyQuery {
           current_fungible_asset_balances(
-            where: {owner_address: {_eq: "${publicKey}"}, amount: {_gt: "0"}}
+            where: {owner_address: {_eq: "${walletPublicKey}"}, amount: {_gt: "0"}}
           ) {
             owner_address
             amount
@@ -166,48 +186,38 @@ const WalletScreen = () => {
             token_standard === "v2"
           );
         })
-        .map((balance: any) => ({
-          name: balance.metadata.name,
-          balance: balance.amount / 10 ** balance.metadata.decimals,
-          contractAddress: balance.metadata.asset_type,
-          standard: balance.token_standard,
-        }));
+        .map((balance: any) => {
+          const formattedBalance = balance.amount / 10 ** balance.metadata.decimals;
+          return {
+            name: balance.metadata.name,
+            balance: formattedBalance,
+            contractAddress: balance.metadata.asset_type,
+            standard: balance.token_standard,
+          };
+        });
 
+      // Update token balances
       setTokenBalances(formattedBalances);
+
+      // Update current balance and symbol in store if APT is found
+      const aptToken = formattedBalances.find(token => token.name.toLowerCase() === 'aptos');
+      if (aptToken) {
+        setCurrentBalance(aptToken.balance);
+        setCurrentSymbol('APT');
+      }
+
     } catch (error) {
       console.error("Error fetching token balances:", error);
       toast.error("Failed to fetch token balances");
     }
   };
 
-  // Fetch token balances when public key is available
+  // Fetch token balances when public key is available or cache expires
   useEffect(() => {
-    if (data[0]?.publicKey) {
-      fetchTokenBalances(data[0].publicKey);
+    if (publicKey && (!isCacheValid() || tokenBalances.length === 0)) {
+      fetchTokenBalances(publicKey);
     }
-  }, [data]);
-
-  // Fetch APT price
-  useEffect(() => {
-    const fetchPrice = async () => {
-      try {
-        const response = await axios.get(
-          "https://api.coingecko.com/api/v3/simple/price",
-          {
-            params: {
-              ids: "aptos",
-              vs_currencies: "usd",
-            },
-          }
-        );
-        setPrice(response.data.aptos.usd);
-      } catch (error) {
-        console.error("Error fetching APT price:", error);
-      }
-    };
-
-    fetchPrice();
-  }, []);
+  }, [publicKey]);
 
   const handleCopy = async () => {
     if (!spanRef.current?.textContent) return;
@@ -229,11 +239,11 @@ const WalletScreen = () => {
     );
   }
 
-  if (error) {
+  if (error && !publicKey) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen px-4">
         <p className="text-red-500 text-center mb-4">{error}</p>
-        <button
+        <button 
           onClick={() => window.location.reload()}
           className="bg-red-500 text-white px-4 py-2 rounded-lg"
         >
