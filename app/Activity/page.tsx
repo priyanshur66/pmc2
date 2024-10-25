@@ -43,7 +43,7 @@ const RecentActivity = () => {
 
   const fetchTransactions = async (cursor: string | null = null) => {
     try {
-      const limit = 8;
+      const limit = 18;
       let url = `https://fullnode.testnet.aptoslabs.com/v1/accounts/${address}/transactions?limit=${limit}`;
       if (cursor) {
         url += `&start=${cursor}`;
