@@ -205,7 +205,7 @@ const TransactionSuccess: React.FC = () => {
       </div>
 
       <button
-        onClick={() => router.push("/wallet")}
+        onClick={() => router.push("/")}
         className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-semibold transition-colors"
       >
         Done
