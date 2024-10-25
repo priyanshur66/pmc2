@@ -210,7 +210,7 @@ const WalletScreen = () => {
       setAddress(res);
       console.log(address);
     }
-  }, [data]);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
