@@ -141,13 +141,19 @@ const TransactionSuccess: React.FC = () => {
         <div className="w-6"></div>
       </div>
 
-      <div className="flex justify-center items-center mb-6">
+      {/* <div className="flex justify-center items-center mb-6">
         <div className="bg-white rounded-full p-4">
           {success ? (
             <img src="/tx-success.svg" alt="Success" className="w-16 h-16" />
           ) : (
             <img src="/tx-failed.svg" alt="Failed" className="w-16 h-16" />
           )}
+        </div>
+      </div> */}
+
+      <div className="flex justify-center items-center mb-4">
+        <div className="bg-white rounded-full p-2 mr-2">
+          <img src="/tx.svg" alt="" className="w-20 h-20" />
         </div>
       </div>
 
