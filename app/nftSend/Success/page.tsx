@@ -126,7 +126,7 @@ const TransactionSuccess: React.FC = () => {
   const txnFee = (parseInt(gas_used) * parseInt(gas_unit_price)) / 100000000;
 
   // Get asset name from changes array
-  const assetName = changes[6]?.data?.data?.name?.value || "Asset Transfer";
+  const assetName = changes[6]?.data?.data?.name?.value || "NFT Transfer";
 
   const shortenAddress = (address: string) =>
     `${address.slice(0, 6)}...${address.slice(-4)}`;
