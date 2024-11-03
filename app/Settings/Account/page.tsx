@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "react-feather";
 import WebApp from "@twa-dev/sdk";
 import { useState, useEffect } from "react";
+import { usePublicKey } from "@/store";
 
 interface UserData {
   id: number;
@@ -16,22 +17,22 @@ interface UserData {
 }
 const AccountDetails = () => {
   const router = useRouter();
-  const [userData, setUserData] = useState<UserData | null>(null)
+  const [userData, setUserData] = useState<UserData | null>(null);
 
-  useEffect(() =>{
-    if (typeof window !== 'undefined') {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (WebApp.initDataUnsafe.user) {
+        setUserData(WebApp.initDataUnsafe.user as UserData);
+      }
+    }
+  });
 
-    if (WebApp.initDataUnsafe.user) {
-      setUserData(WebApp.initDataUnsafe.user as UserData)
-    } 
- } })
-
-
+  const { publicKey } = usePublicKey();
 
   const accounts = [
     {
       name: "",
-      address: "0x41...c866",
+      address: publicKey,
       icon: "/ziptos.svg", // Replace with your actual icon path
       isSelected: true,
     },
@@ -39,7 +40,7 @@ const AccountDetails = () => {
 
   return (
     <div className="bg-[#323030] min-h-screen p-4">
-    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4">
         <button onClick={() => router.back()} className="text-white">
           {/* Back Arrow Icon */}
           <ArrowLeft className="mr-4" />
@@ -62,7 +63,9 @@ const AccountDetails = () => {
               className="rounded-full"
             />
             <div className="ml-4">
-              <p className="text-white font-semibold">{userData?.username || 'N/A'}</p>
+              <p className="text-white font-semibold">
+                {userData?.username || "N/A"}
+              </p>
               <p className="text-gray-400">{account.address}</p>
             </div>
           </div>
