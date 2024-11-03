@@ -96,12 +96,12 @@ export default function ImportAccount() {
     try {
       const mnemonicPhrase = phrase.join(" ").toLowerCase();
       console.log("Using mnemonic phrase:", mnemonicPhrase);
-
+  
       if (!cryptoModule) return null;
       const { crypto } = cryptoModule;
-
-      // Generate seed using BIP39 standard
-      const salt = "APTOS";
+  
+      // Generate seed using BIP39 standard with a random salt
+      const salt = crypto.randomBytes(16).toString('hex'); 
       const seedBuffer = crypto.pbkdf2Sync(
         mnemonicPhrase,
         `mnemonic${salt}`,
@@ -109,21 +109,21 @@ export default function ImportAccount() {
         64,
         "sha512"
       );
-
+  
       // Convert seed to private key bytes
       const privateKeyBytes = new Uint8Array(seedBuffer.slice(0, 32));
       console.log("Private key bytes:", privateKeyBytes);
-
+  
       // Create Ed25519PrivateKey instance
       const privateKey = new Ed25519PrivateKey(privateKeyBytes);
       console.log("Ed25519 private key created");
-
+  
       // Create Account with legacy Ed25519
       const account = Account.fromPrivateKey({
         privateKey,
-        legacy: true, // Only specify legacy flag
+        legacy: true, 
       });
-
+  
       console.log(
         "Derived account address:",
         account.accountAddress.toString()
