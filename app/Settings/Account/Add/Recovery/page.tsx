@@ -2,7 +2,11 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Account, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
+import {
+  Account,
+  Ed25519PrivateKey,
+  SigningSchemeInput,
+} from "@aptos-labs/ts-sdk";
 import { doc, setDoc } from "firebase/firestore";
 import db from "@/firebaseConfig";
 
@@ -17,11 +21,9 @@ export default function ImportAccount() {
   const [WebApp, setWebApp] = useState<any>(null);
   const router = useRouter();
 
-  // Initialize crypto and WebApp after component mounts
   useEffect(() => {
     const initializeDependencies = async () => {
       try {
-        // Initialize crypto
         const crypto = require("crypto");
         const algorithm = "aes-256-cbc";
         const key = crypto.createHash("sha256").update("KEY_TEST").digest();
@@ -29,7 +31,6 @@ export default function ImportAccount() {
 
         setCryptoModule({ crypto, algorithm, key, iv });
 
-        // Initialize WebApp
         const WebAppModule = await import("@twa-dev/sdk");
         setWebApp(WebAppModule.default);
       } catch (error) {
@@ -55,23 +56,18 @@ export default function ImportAccount() {
   const handleInputChange = (index: number, value: string) => {
     const newPhrase = [...recoveryPhrase];
 
-    // If this is the first input box, check for a full phrase paste
     if (index === 0) {
       const words = value.toLowerCase().trim().split(/\s+/);
       if (words.length > 1) {
-        // If we have multiple words, fill all boxes
         const filledPhrase = Array(12).fill("");
         words.forEach((word, idx) => {
-          if (idx < 12) {
-            filledPhrase[idx] = word;
-          }
+          if (idx < 12) filledPhrase[idx] = word;
         });
         setRecoveryPhrase(filledPhrase);
         return;
       }
     }
 
-    // Single word input handling
     newPhrase[index] = value.toLowerCase().trim();
     setRecoveryPhrase(newPhrase);
     setError("");
@@ -81,59 +77,60 @@ export default function ImportAccount() {
     e: React.ClipboardEvent<HTMLInputElement>,
     index: number
   ) => {
-    // Prevent default only for the first input
     if (index === 0) {
       e.preventDefault();
       const pastedText = e.clipboardData.getData("text");
       const words = pastedText.toLowerCase().trim().split(/\s+/);
 
-      // Fill all boxes with pasted words
       const filledPhrase = Array(12).fill("");
       words.forEach((word, idx) => {
-        if (idx < 12) {
-          filledPhrase[idx] = word;
-        }
+        if (idx < 12) filledPhrase[idx] = word;
       });
       setRecoveryPhrase(filledPhrase);
     }
   };
 
-  const derivePrivateKeyFromPhrase = async (
+  const deriveAccountFromMnemonic = async (
     phrase: string[]
-  ): Promise<string | null> => {
+  ): Promise<{ privateKey: Ed25519PrivateKey; account: Account } | null> => {
     try {
       const mnemonicPhrase = phrase.join(" ").toLowerCase();
+      console.log("Using mnemonic phrase:", mnemonicPhrase);
 
       if (!cryptoModule) return null;
       const { crypto } = cryptoModule;
 
-      const salt = "mnemonic";
-      const seed = crypto.pbkdf2Sync(mnemonicPhrase, salt, 2048, 32, "sha512");
-
-      return seed.toString("hex");
-    } catch (err) {
-      console.error("Error deriving private key from phrase:", err);
-      return null;
-    }
-  };
-
-  const getPublicKey = async (privateKeyHex: string) => {
-    try {
-      const privateKeyBytes = new Uint8Array(
-        privateKeyHex.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) || []
+      // Generate seed using BIP39 standard
+      const salt = "APTOS";
+      const seedBuffer = crypto.pbkdf2Sync(
+        mnemonicPhrase,
+        `mnemonic${salt}`,
+        2048,
+        64,
+        "sha512"
       );
 
-      const privateKeyObj = new Ed25519PrivateKey(privateKeyBytes);
+      // Convert seed to private key bytes
+      const privateKeyBytes = new Uint8Array(seedBuffer.slice(0, 32));
+      console.log("Private key bytes:", privateKeyBytes);
 
+      // Create Ed25519PrivateKey instance
+      const privateKey = new Ed25519PrivateKey(privateKeyBytes);
+      console.log("Ed25519 private key created");
+
+      // Create Account with legacy Ed25519
       const account = Account.fromPrivateKey({
-        privateKey: privateKeyObj,
-        legacy: true,
+        privateKey,
+        legacy: true, // Only specify legacy flag
       });
 
-      return { address: account.accountAddress.toString(), privateKeyHex };
+      console.log(
+        "Derived account address:",
+        account.accountAddress.toString()
+      );
+      return { privateKey, account };
     } catch (err) {
-      console.error("Error deriving address:", err);
-      setError("Invalid recovery phrase");
+      console.error("Error deriving account from mnemonic:", err);
       return null;
     }
   };
@@ -145,9 +142,7 @@ export default function ImportAccount() {
   ) => {
     try {
       const encryptedResult = encrypt(privateKeyHex);
-      if (!encryptedResult) {
-        throw new Error("Encryption failed");
-      }
+      if (!encryptedResult) throw new Error("Encryption failed");
 
       const walletData = {
         id: userId,
@@ -156,6 +151,8 @@ export default function ImportAccount() {
         iv: encryptedResult.iv,
         referralLink: `https://t.me/ZiptosWalletBot?start=${userId}`,
         encryptedData: encryptedResult.encryptedData,
+        createdAt: new Date().toISOString(),
+        lastUpdated: new Date().toISOString(),
       };
 
       await setDoc(doc(db, "testWalletUsers", userId), walletData, {
@@ -192,34 +189,36 @@ export default function ImportAccount() {
 
     setIsLoading(true);
     try {
-      const privateKeyHex = await derivePrivateKeyFromPhrase(recoveryPhrase);
-      if (!privateKeyHex) {
-        setError("Failed to derive private key from recovery phrase");
+      const result = await deriveAccountFromMnemonic(recoveryPhrase);
+      if (!result) {
+        setError("Failed to derive account from recovery phrase");
         return;
       }
 
-      const accountInfo = await getPublicKey(privateKeyHex);
-      if (accountInfo) {
-        const { address, privateKeyHex: derivedPrivateKey } = accountInfo;
+      const { privateKey, account } = result;
+      const address = account.accountAddress.toString();
+      const privateKeyHex = Buffer.from(privateKey.toString()).toString("hex");
 
-        const userId = WebApp.initDataUnsafe?.user?.id;
-        if (!userId) {
-          setError("Unable to get user information");
-          return;
-        }
+      console.log("Account address:", address);
+      console.log("Private key (hex):", privateKeyHex);
 
-        const success = await updateFirebaseAccount(
-          String(userId),
-          address,
-          derivedPrivateKey
-        );
+      const userId = WebApp.initDataUnsafe?.user?.id;
+      if (!userId) {
+        setError("Unable to get user information");
+        return;
+      }
 
-        if (success) {
-          console.log("Successfully imported account with address:", address);
-          router.push("/");
-        } else {
-          setError("Failed to update account information");
-        }
+      const success = await updateFirebaseAccount(
+        String(userId),
+        address,
+        privateKeyHex
+      );
+
+      if (success) {
+        console.log("Successfully imported account with address:", address);
+        router.push("/");
+      } else {
+        setError("Failed to update account information");
       }
     } catch (err) {
       console.error("Error in handleNextClick:", err);
