@@ -7,7 +7,9 @@ import { doc, setDoc } from "firebase/firestore";
 import db from "@/firebaseConfig";
 
 export default function ImportAccount() {
-  const [recoveryPhrase, setRecoveryPhrase] = useState<string[]>(Array(12).fill(""));
+  const [recoveryPhrase, setRecoveryPhrase] = useState<string[]>(
+    Array(12).fill("")
+  );
   const [showPhrase, setShowPhrase] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -20,15 +22,15 @@ export default function ImportAccount() {
     const initializeDependencies = async () => {
       try {
         // Initialize crypto
-        const crypto = require('crypto');
-        const algorithm = 'aes-256-cbc';
-        const key = crypto.createHash('sha256').update('KEY_TEST').digest();
+        const crypto = require("crypto");
+        const algorithm = "aes-256-cbc";
+        const key = crypto.createHash("sha256").update("KEY_TEST").digest();
         const iv = crypto.randomBytes(16);
-        
+
         setCryptoModule({ crypto, algorithm, key, iv });
 
         // Initialize WebApp
-        const WebAppModule = await import('@twa-dev/sdk');
+        const WebAppModule = await import("@twa-dev/sdk");
         setWebApp(WebAppModule.default);
       } catch (error) {
         console.error("Error initializing dependencies:", error);
@@ -36,7 +38,7 @@ export default function ImportAccount() {
       }
     };
 
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       initializeDependencies();
     }
   }, []);
@@ -45,37 +47,70 @@ export default function ImportAccount() {
     if (!cryptoModule) return null;
     const { crypto, algorithm, key, iv } = cryptoModule;
     const cipher = crypto.createCipheriv(algorithm, key, iv);
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    return { iv: iv.toString('hex'), encryptedData: encrypted };
+    let encrypted = cipher.update(text, "utf8", "hex");
+    encrypted += cipher.final("hex");
+    return { iv: iv.toString("hex"), encryptedData: encrypted };
   }
 
   const handleInputChange = (index: number, value: string) => {
     const newPhrase = [...recoveryPhrase];
+
+    // If this is the first input box, check for a full phrase paste
+    if (index === 0) {
+      const words = value.toLowerCase().trim().split(/\s+/);
+      if (words.length > 1) {
+        // If we have multiple words, fill all boxes
+        const filledPhrase = Array(12).fill("");
+        words.forEach((word, idx) => {
+          if (idx < 12) {
+            filledPhrase[idx] = word;
+          }
+        });
+        setRecoveryPhrase(filledPhrase);
+        return;
+      }
+    }
+
+    // Single word input handling
     newPhrase[index] = value.toLowerCase().trim();
     setRecoveryPhrase(newPhrase);
     setError("");
   };
 
-  const derivePrivateKeyFromPhrase = async (phrase: string[]): Promise<string | null> => {
+  const handlePaste = (
+    e: React.ClipboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    // Prevent default only for the first input
+    if (index === 0) {
+      e.preventDefault();
+      const pastedText = e.clipboardData.getData("text");
+      const words = pastedText.toLowerCase().trim().split(/\s+/);
+
+      // Fill all boxes with pasted words
+      const filledPhrase = Array(12).fill("");
+      words.forEach((word, idx) => {
+        if (idx < 12) {
+          filledPhrase[idx] = word;
+        }
+      });
+      setRecoveryPhrase(filledPhrase);
+    }
+  };
+
+  const derivePrivateKeyFromPhrase = async (
+    phrase: string[]
+  ): Promise<string | null> => {
     try {
-      // Join the phrase words with spaces
       const mnemonicPhrase = phrase.join(" ").toLowerCase();
-      
+
       if (!cryptoModule) return null;
       const { crypto } = cryptoModule;
-      
-      // Generate seed from mnemonic 
+
       const salt = "mnemonic";
-      const seed = crypto.pbkdf2Sync(
-        mnemonicPhrase,
-        salt,
-        2048,
-        32,
-        'sha512'
-      );
-      
-      return seed.toString('hex');
+      const seed = crypto.pbkdf2Sync(mnemonicPhrase, salt, 2048, 32, "sha512");
+
+      return seed.toString("hex");
     } catch (err) {
       console.error("Error deriving private key from phrase:", err);
       return null;
@@ -85,14 +120,14 @@ export default function ImportAccount() {
   const getPublicKey = async (privateKeyHex: string) => {
     try {
       const privateKeyBytes = new Uint8Array(
-        privateKeyHex.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || []
+        privateKeyHex.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) || []
       );
 
       const privateKeyObj = new Ed25519PrivateKey(privateKeyBytes);
 
-      const account = Account.fromPrivateKey({ 
+      const account = Account.fromPrivateKey({
         privateKey: privateKeyObj,
-        legacy: true
+        legacy: true,
       });
 
       return { address: account.accountAddress.toString(), privateKeyHex };
@@ -103,7 +138,11 @@ export default function ImportAccount() {
     }
   };
 
-  const updateFirebaseAccount = async (userId: string, address: string, privateKeyHex: string) => {
+  const updateFirebaseAccount = async (
+    userId: string,
+    address: string,
+    privateKeyHex: string
+  ) => {
     try {
       const encryptedResult = encrypt(privateKeyHex);
       if (!encryptedResult) {
@@ -113,13 +152,15 @@ export default function ImportAccount() {
       const walletData = {
         id: userId,
         publicKey: address,
-        userName: WebApp?.initDataUnsafe?.user?.username || 'Anonymous',
+        userName: WebApp?.initDataUnsafe?.user?.username || "Anonymous",
         iv: encryptedResult.iv,
         referralLink: `https://t.me/ZiptosWalletBot?start=${userId}`,
         encryptedData: encryptedResult.encryptedData,
       };
 
-      await setDoc(doc(db, "testWalletUsers", userId), walletData, { merge: true });
+      await setDoc(doc(db, "testWalletUsers", userId), walletData, {
+        merge: true,
+      });
       return true;
     } catch (error) {
       console.error("Error updating wallet in Firebase:", error);
@@ -128,7 +169,7 @@ export default function ImportAccount() {
   };
 
   const validateRecoveryPhrase = () => {
-    const isComplete = recoveryPhrase.every(word => word.trim() !== "");
+    const isComplete = recoveryPhrase.every((word) => word.trim() !== "");
     if (!isComplete) {
       setError("Please fill in all recovery phrase words");
       return false;
@@ -160,7 +201,7 @@ export default function ImportAccount() {
       const accountInfo = await getPublicKey(privateKeyHex);
       if (accountInfo) {
         const { address, privateKeyHex: derivedPrivateKey } = accountInfo;
-        
+
         const userId = WebApp.initDataUnsafe?.user?.id;
         if (!userId) {
           setError("Unable to get user information");
@@ -188,11 +229,32 @@ export default function ImportAccount() {
     }
   };
 
+  const focusNextInput = (index: number) => {
+    if (index < 11) {
+      const nextInput = document.querySelector(
+        `input[data-index="${index + 1}"]`
+      ) as HTMLInputElement;
+      if (nextInput) {
+        nextInput.focus();
+      }
+    }
+  };
+
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault();
+      focusNextInput(index);
+    }
+  };
+
   return (
     <div className="bg-[#323030] min-h-screen text-white p-6 flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <button 
-          onClick={() => router.back()} 
+        <button
+          onClick={() => router.back()}
           className="text-white hover:text-gray-300 transition-colors"
         >
           <ArrowLeft className="w-6 h-6" />
@@ -204,7 +266,7 @@ export default function ImportAccount() {
       <main className="flex-grow mt-6">
         <h2 className="text-2xl font-bold mb-2">Enter Recovery Phrase</h2>
         <p className="text-gray-400 mb-6">
-          Enter your 12-word recovery phrase to import your wallet
+          Enter or paste your 12-word recovery phrase into the first box
         </p>
 
         <div className="grid grid-cols-2 gap-4 mb-8">
@@ -215,16 +277,19 @@ export default function ImportAccount() {
                 type={showPhrase ? "text" : "password"}
                 value={word}
                 onChange={(e) => handleInputChange(index, e.target.value)}
+                onPaste={(e) => handlePaste(e, index)}
+                onKeyDown={(e) => handleKeyDown(e, index)}
+                data-index={index}
                 className={`w-full bg-[#494949] rounded-lg py-2 px-3 text-white 
                   placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500
-                  ${error && !word ? 'border-2 border-red-500' : ''}`}
+                  ${error && !word ? "border-2 border-red-500" : ""}`}
                 placeholder={`Word ${index + 1}`}
               />
             </div>
           ))}
         </div>
 
-        <button 
+        <button
           onClick={() => setShowPhrase(!showPhrase)}
           className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4"
         >
@@ -239,9 +304,7 @@ export default function ImportAccount() {
           )}
         </button>
 
-        {error && (
-          <p className="text-red-500 text-sm mb-4">{error}</p>
-        )}
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
       </main>
 
       <footer className="mt-auto">
