@@ -97,38 +97,18 @@ export default function ImportAccount() {
       const mnemonicPhrase = phrase.join(" ").toLowerCase();
       console.log("Using mnemonic phrase:", mnemonicPhrase);
   
-      if (!cryptoModule) return null;
-      const { crypto } = cryptoModule;
+      // Define derivation path, typically used for ED25519 wallets
+      const derivationPath = "m/44'/637'/0'/0'/0'";
   
-      // Generate seed using BIP39 standard with a random salt
-      const salt = crypto.randomBytes(16).toString('hex'); 
-      const seedBuffer = crypto.pbkdf2Sync(
-        mnemonicPhrase,
-        `mnemonic${salt}`,
-        2048,
-        64,
-        "sha512"
-      );
-  
-      // Convert seed to private key bytes
-      const privateKeyBytes = new Uint8Array(seedBuffer.slice(0, 32));
-      console.log("Private key bytes:", privateKeyBytes);
-  
-      // Create Ed25519PrivateKey instance
-      const privateKey = new Ed25519PrivateKey(privateKeyBytes);
-      console.log("Ed25519 private key created");
-  
-      // Create Account with legacy Ed25519
-      const account = Account.fromPrivateKey({
-        privateKey,
-        legacy: true, 
+      // Derive the account directly from the mnemonic using the specified derivation path
+      const account = Account.fromDerivationPath({
+        path: derivationPath,
+        mnemonic: mnemonicPhrase,
+        scheme: SigningSchemeInput.Ed25519,
       });
   
-      console.log(
-        "Derived account address:",
-        account.accountAddress.toString()
-      );
-      return { privateKey, account };
+      console.log("Derived account address:", account.accountAddress.toString());
+      return { privateKey: account.privateKey, account };
     } catch (err) {
       console.error("Error deriving account from mnemonic:", err);
       return null;
