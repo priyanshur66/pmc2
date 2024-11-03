@@ -32,7 +32,7 @@ const AccountDetails = () => {
   const accounts = [
     {
       name: "",
-      address: publicKey,
+      address: publicKey.slice(0, 6) + "..." + publicKey.slice(-4),
       icon: "/ziptos.svg", // Replace with your actual icon path
       isSelected: true,
     },
