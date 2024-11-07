@@ -12,8 +12,9 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  setDoc,
 } from "firebase/firestore";
-import { getDoc, setDoc } from "firebase/firestore";
+import { getDoc } from "firebase/firestore";
 import db from "@/firebaseConfig";
 import WebApp from "@twa-dev/sdk";
 import axios from "axios";
@@ -21,7 +22,7 @@ import { Clipboard } from "lucide-react";
 import { useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { AptosClient, AptosAccount } from "aptos";
 import { usePublicKey } from "@/store";
 import { useIvData } from "@/store";
 import { useEncryptedValue } from "@/store";
@@ -30,6 +31,12 @@ import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 
 const aptosConfig = new AptosConfig({ network: Network.TESTNET });
 export const aptos = new Aptos(aptosConfig);
+
+// Add crypto requirements for wallet encryption
+const crypto = require("crypto");
+const algorithm = "aes-256-cbc";
+const key = crypto.createHash("sha256").update("KEY_TEST").digest();
+const iv = crypto.randomBytes(16);
 
 interface TokenBalance {
   name: string;
@@ -135,6 +142,7 @@ const WalletScreen = () => {
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
   const [address, setAddress] = useState("");
   const [isBalanceVisible, setIsBalanceVisible] = useState(true); // State to control balance visibility
+  const [isLoading, setIsLoading] = useState(false);
   const spanRef = useRef<HTMLSpanElement | null>(null);
   const { publicKey, setPublicKey } = usePublicKey();
   const { ivData, setIvData } = useIvData();
@@ -198,7 +206,51 @@ const WalletScreen = () => {
       console.error("Error fetching token balances:", error);
     }
   };
+  function encrypt(text: string) {
+    const cipher = crypto.createCipheriv(algorithm, key, iv);
+    let encrypted = cipher.update(text, "utf8", "hex");
+    encrypted += cipher.final("hex");
+    return { iv: iv.toString("hex"), encryptedData: encrypted };
+  }
 
+  // Add wallet generation function
+  const generateAndSaveWallet = async (userId: string, username: string) => {
+    try {
+      setIsLoading(true);
+      const client = new AptosClient(NODE_URL);
+      const newAccount = new AptosAccount();
+
+      const address = newAccount.address().hex();
+      const privateKey = newAccount.toPrivateKeyObject().privateKeyHex;
+      const encryptedResult = encrypt(privateKey);
+
+      const walletData = {
+        id: userId,
+        publicKey: address,
+        userName: username,
+        iv: encryptedResult.iv,
+        referralLink: `https://t.me/ZiptosWalletBot?start=${userId}`,
+        referredBy: "",
+        encryptedData: encryptedResult.encryptedData,
+      };
+
+      await setDoc(doc(db, "testWalletUsers", userId), walletData);
+
+      setData([walletData]);
+      setPublicKey(address);
+      setIvData(encryptedResult.iv);
+      const res = usePublicKey.getState().publicKey;
+      setEncryptedValue(encryptedResult.encryptedData);
+      setAddress(res);
+
+      return walletData;
+    } catch (error) {
+      console.error("Error generating wallet:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     console.log("data is", data);
     if (data.length > 0) {
@@ -213,12 +265,44 @@ const WalletScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (WebApp.initDataUnsafe.user) {
-        setUserData(WebApp.initDataUnsafe.user as UserData);
+    const initializeUser = async () => {
+      if (typeof window !== "undefined" && WebApp.initDataUnsafe.user) {
+        const user = WebApp.initDataUnsafe.user as UserData;
+        setUserData(user);
+
+        try {
+          const querySnapshot = await getDocs(
+            collection(db, "testWalletUsers")
+          );
+          const matchedData = querySnapshot.docs
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+            .filter((doc) => doc.id === String(user.id)) as MyData[];
+
+          if (matchedData.length > 0) {
+            fetchTokenBalances(matchedData[0].publicKey);
+            setData(matchedData);
+            setPublicKey(matchedData[0].publicKey);
+            setIvData(matchedData[0].iv);
+            setEncryptedValue(matchedData[0].encryptedData);
+            const res = usePublicKey.getState().publicKey;
+            setAddress(res);
+          } else {
+            const newWalletData = await generateAndSaveWallet(
+              String(user.id),
+              user.username || "Anonymous"
+            );
+          }
+        } catch (error) {
+          console.error("Error initializing user:", error);
+        }
       }
-    }
-  });
+    };
+
+    initializeUser();
+  }, []);
 
   console.log(userData?.id);
 
